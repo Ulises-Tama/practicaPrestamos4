@@ -1,0 +1,37 @@
+﻿@model practicaPrestamos.Entidades.User
+
+@{
+    ViewData["Title"] = "Registro";
+}
+
+<div class="register-container">
+    <h2>Regístrate</h2>
+    <form method="post" action="/Home/Register">
+        <div class="form-group">
+            <label asp-for="Name">Nombre</label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Email">Correo electrónico</label>
+            <input asp-for="Email" class="form-control" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Password">Contraseña</label>
+            <input asp-for="Password" type="password" class="form-control" />
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+        <button type="submit" class="btn btn-primary">Registrarse</button>
+    </form>
+
+    <div class="register-links">
+        <a asp-controller="Account" asp-action="Login">Volver al login</a>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

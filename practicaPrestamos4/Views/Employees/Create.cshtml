@@ -1,0 +1,70 @@
+﻿@model practicaPrestamos.Entidades.Employee
+
+<div class="card shadow-lg p-3 mb-5 bg-body rounded" >
+    <div class="card-header">
+        Agregar Nuevo Empleado
+    </div>
+    <div class="card-body">
+        <a asp-action="Index" class="btn btn-primary">Regresar</a>
+
+        <br />
+        <br />
+        <form asp-action="Create">
+            <div class="form-group">
+                <label asp-for="PayrollNumber" class="control-label"></label>
+                <input asp-for="PayrollNumber" class="form-control" />
+                <span asp-validation-for="PayrollNumber" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="EmployeeName" class="control-label"></label>
+                <input asp-for="EmployeeName" class="form-control" />
+                <span asp-validation-for="EmployeeName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="EmployeeLastname1" class="control-label"></label>
+                <input asp-for="EmployeeLastname1" class="form-control" />
+                <span asp-validation-for="EmployeeLastname1" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="EmployeeLastname2" class="control-label"></label>
+                <input asp-for="EmployeeLastname2" class="form-control" />
+                <span asp-validation-for="EmployeeLastname2" class="text-danger"></span>
+            </div>
+            <br />
+            <div class="form-group form-check">
+                <input type="checkbox" class="form-check-input" id="confirmData" name="confirmData" required />
+                <label class="form-check-label" for="confirmData">
+                    Por favor, confirma que los datos son correctos antes de continuar.
+                </label>
+                <span class="text-danger" id="confirmDataError" style="display: none;">Debes confirmar que los datos son correctos.</span>
+            </div>
+            <br />
+            <div class="form-group">
+                <input type="submit" value="Crear" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        // Validación personalizada para el checkbox
+        document.querySelector('form').addEventListener('submit', function (event) {
+            const checkbox = document.getElementById('confirmData');
+            const errorMessage = document.getElementById('confirmDataError');
+
+            if (!checkbox.checked) {
+                errorMessage.style.display = 'block';
+                event.preventDefault(); // Evita que el formulario se envíe
+            } else {
+                errorMessage.style.display = 'none';
+            }
+        });
+    </script>
+}

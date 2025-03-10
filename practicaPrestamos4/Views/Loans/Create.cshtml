@@ -1,0 +1,132 @@
+﻿@model practicaPrestamos.Entidades.Loan
+@{
+    var employee = ViewBag.Employee as practicaPrestamos.Entidades.Employee;
+    var paymentTypes = ViewBag.PaymentTypes as List<practicaPrestamos.Entidades.PaymentType>;
+}
+
+
+
+<div class="card shadow-lg p-3 mb-5 bg-body rounded">
+    <div class="card-header">
+        Nuevo Préstamo para @employee.EmployeeName @employee.EmployeeLastname1 @employee.EmployeeLastname2
+    </div>
+    <div class="card-body">
+        <a asp-action="Index" class="btn btn-primary">Regresar</a>
+
+        <br />
+        <br />
+        <form asp-action="Create" method="post">
+            <input type="hidden" asp-for="LoanEmployeeId" value="@employee.EmployeeId" />
+
+            <!-- Monto del Préstamo -->
+            <div class="form-group">
+                <label asp-for="LoanAmount" class="control-label"></label>
+                <input asp-for="LoanAmount" class="form-control" id="loanAmount" />
+                <span asp-validation-for="LoanAmount" class="text-danger"></span>
+            </div>
+
+            <!-- Tipo de Pago -->
+            <div class="form-group">
+                <label asp-for="LoanPaymentTypeId" class="control-label"></label>
+                <select asp-for="LoanPaymentTypeId" class="form-control" id="paymentType">
+                    @foreach (var paymentType in paymentTypes)
+                    {
+                        <option value="@paymentType.PaymentTypeId">@paymentType.ShortName</option>
+                    }
+                </select>
+                <span asp-validation-for="LoanPaymentTypeId" class="text-danger"></span>
+            </div>
+
+            <!-- Fecha del Primer Pago -->
+            <div class="form-group" id="firstPaymentDateGroup">
+                <label asp-for="LoanFirstPaymentDate" class="control-label"></label>
+                <input asp-for="LoanFirstPaymentDate" class="form-control" type="date" id="firstPaymentDate" />
+                <span asp-validation-for="LoanFirstPaymentDate" class="text-danger"></span>
+            </div>
+
+            <!-- Fecha del Último Pago -->
+            <div class="form-group">
+                <label asp-for="LoanFinalPaymentDate" class="control-label"></label>
+                <input asp-for="LoanFinalPaymentDate" class="form-control" type="date" id="finalPaymentDate" />
+                <span asp-validation-for="LoanFinalPaymentDate" class="text-danger"></span>
+            </div>
+
+            <!-- Intereses Aprobados -->
+            <div class="form-group">
+                <label asp-for="LoanApprovedInterest" class="control-label"></label>
+                <input asp-for="LoanApprovedInterest" class="form-control" id="approvedInterest" />
+                <span asp-validation-for="LoanApprovedInterest" class="text-danger"></span>
+            </div>
+
+            <!-- Intereses Moratorios -->
+            <div class="form-group">
+                <label asp-for="LoanLateInterest" class="control-label"></label>
+                <input asp-for="LoanLateInterest" class="form-control" id="lateInterest" />
+                <span asp-validation-for="LoanLateInterest" class="text-danger"></span>
+            </div>
+
+            <!-- Cantidad Total a Pagar (Calculada) -->
+            <div class="form-group">
+                <label class="control-label">Cantidad Total a Pagar</label>
+                <input class="form-control" id="totalAmountToPay" readonly />
+            </div>
+
+            <!-- Notas -->
+            <div class="form-group">
+                <label asp-for="LoanNotes" class="control-label"></label>
+                <textarea asp-for="LoanNotes" class="form-control"></textarea>
+                <span asp-validation-for="LoanNotes" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Crear Préstamo" class="btn btn-primary" />
+                <a asp-action="Index" asp-controller="Employees" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const loanAmountInput = document.getElementById('loanAmount');
+            const paymentTypeSelect = document.getElementById('paymentType');
+            const firstPaymentDateGroup = document.getElementById('firstPaymentDateGroup');
+            const firstPaymentDateInput = document.getElementById('firstPaymentDate');
+            const approvedInterestInput = document.getElementById('approvedInterest');
+            const lateInterestInput = document.getElementById('lateInterest');
+            const totalAmountToPayInput = document.getElementById('totalAmountToPay');
+
+            // Ocultar/mostrar la fecha del primer pago según el tipo de pago
+            paymentTypeSelect.addEventListener('change', function () {
+                if (paymentTypeSelect.value === '5') { // "Al Final"
+                    firstPaymentDateGroup.style.display = 'none';
+                    firstPaymentDateInput.removeAttribute('required');
+                } else {
+                    firstPaymentDateGroup.style.display = 'block';
+                    firstPaymentDateInput.setAttribute('required', 'required');
+                }
+            });
+
+            // Calcular la cantidad total a pagar
+            function calculateTotalAmount() {
+                const loanAmount = parseFloat(loanAmountInput.value) || 0;
+                const approvedInterest = parseFloat(approvedInterestInput.value) || 0;
+                const lateInterest = parseFloat(lateInterestInput.value) || 0;
+
+                const totalInterest = approvedInterest + lateInterest;
+                const totalAmount = loanAmount + (loanAmount * (totalInterest / 100));
+
+                totalAmountToPayInput.value = totalAmount.toFixed(2);
+            }
+
+            loanAmountInput.addEventListener('input', calculateTotalAmount);
+            approvedInterestInput.addEventListener('input', calculateTotalAmount);
+            lateInterestInput.addEventListener('input', calculateTotalAmount);
+        });
+    </script>
+}
