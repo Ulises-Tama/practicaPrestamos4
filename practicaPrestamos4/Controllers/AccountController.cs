@@ -1,128 +1,171 @@
 ﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using practicaPrestamos4.Entidades;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Authorization;
 
 namespace practicaPrestamos4.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly SignInManager<User> _signInManager;
-        private readonly UserManager<User> _userManager;
-
-        public AccountController(SignInManager<User> signInManager, UserManager<User> userManager)
-        {
-            _signInManager = signInManager;
-            _userManager = userManager;
-        }
-
         [HttpGet]
-        [AllowAnonymous]
         public IActionResult Login(string returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
+            ViewBag.Layout = "_LayoutUnauthenticated";  // Usar el layout para usuarios no autenticados
             return View();
         }
 
         [HttpPost]
-        [AllowAnonymous]
         public async Task<IActionResult> Login(string email, string password, string returnUrl = null)
         {
-            Console.WriteLine("Entró a la función de login.");
-            Console.WriteLine($"{email} con {password}");
-
-            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            if (IsValidUser(email, password))
             {
-                ModelState.AddModelError("", "El correo electrónico y la contraseña son requeridos.");
-                return View();
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Email, email),
+                    new Claim(ClaimTypes.Name, email)
+                };
+
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var authProperties = new AuthenticationProperties
+                {
+                    IsPersistent = true
+                };
+
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(claimsIdentity),
+                    authProperties);
+
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                {
+                    return Redirect(returnUrl);
+                }
+                return RedirectToAction("Index", "Home");
             }
 
-            // Buscar el usuario por email
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user == null)
-            {
-                ModelState.AddModelError("", "El correo electrónico no está registrado.");
-                return View();
-            }
-
-            // Intentar iniciar sesión
-            var result = await _signInManager.PasswordSignInAsync(user, password, false, false);
-            Console.WriteLine($"{result}");
-            if (result.Succeeded)
-            {
-                Console.WriteLine("Login exitoso.");
-                return RedirectToLocal(returnUrl);
-            }
-            Console.WriteLine("Login NO exitoso.");
-
-            ModelState.AddModelError("", "Correo o contraseña incorrectos.");
+            ModelState.AddModelError("", "Correo electrónico o contraseña incorrectos.");
+            ViewBag.Layout = "_LayoutUnauthenticated";  // Usar el layout para usuarios no autenticados
             return View();
         }
 
         [HttpPost]
         public async Task<IActionResult> Logout()
         {
-            await _signInManager.SignOutAsync();
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Login");
         }
 
-        private IActionResult RedirectToLocal(string returnUrl)
+        private bool IsValidUser(string email, string password)
         {
-            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+            using (var connection = new SqlConnection("YourConnectionString"))
             {
-                return Redirect(returnUrl);
-            }
+                var query = "SELECT Password FROM Users WHERE Email = @Email";
+                var command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@Email", email);
 
-            return RedirectToAction("Index", "Home");
+                connection.Open();
+                var reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    var storedPassword = reader["Password"].ToString();
+                    return password == storedPassword; // Comparación directa de contraseñas
+                }
+                return false;
+            }
         }
 
         [HttpGet]
         [AllowAnonymous]
         public IActionResult Register()
         {
+            ViewBag.Layout = "_LayoutUnauthenticated";  // Usar el layout para usuarios no autenticados
             return View();
         }
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> Register(string email, string password)
+        public async Task<IActionResult> Register(string email, string password, string name)
         {
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(name))
+            {
+                ModelState.AddModelError("", "El correo electrónico, la contraseña y el nombre son requeridos.");
+                ViewBag.Layout = "_LayoutUnauthenticated";  // Usar el layout para usuarios no autenticados
+                return View();
+            }
+
+            if (await IsEmailExists(email))
+            {
+                ModelState.AddModelError("", "El correo electrónico ya está registrado.");
+                ViewBag.Layout = "_LayoutUnauthenticated";  // Usar el layout para usuarios no autenticados
+                return View();
+            }
+
             var user = new User
             {
-                UserName = email,
-                Email = email
+                Email = email,
+                Password = password, // Almacenar la contraseña en texto plano
+                Name = name,
+                NormalizedEmail = email.ToUpper(),
+                UserStatus = 2, // Estado del usuario (2 = Activo)
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
             };
 
-            var result = await _userManager.CreateAsync(user, password);
-            if (result.Succeeded)
+            using (var connection = new SqlConnection("YourConnectionString"))
             {
-                return RedirectToAction("Login");
+                var query = @"
+                    INSERT INTO Users (Email, Password, Name, NormalizedEmail, UserStatus, CreatedAt, UpdatedAt)
+                    VALUES (@Email, @Password, @Name, @NormalizedEmail, @UserStatus, @CreatedAt, @UpdatedAt)";
+
+                var command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@Email", user.Email);
+                command.Parameters.AddWithValue("@Password", user.Password);
+                command.Parameters.AddWithValue("@Name", user.Name);
+                command.Parameters.AddWithValue("@NormalizedEmail", user.NormalizedEmail);
+                command.Parameters.AddWithValue("@UserStatus", user.UserStatus);
+                command.Parameters.AddWithValue("@CreatedAt", user.CreatedAt);
+                command.Parameters.AddWithValue("@UpdatedAt", user.UpdatedAt);
+
+                connection.Open();
+                await command.ExecuteNonQueryAsync();
             }
 
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError(string.Empty, error.Description);
-            }
-
-            return View();
+            return RedirectToAction("Login");
         }
+
+        [HttpGet]
+        [AllowAnonymous]
         public IActionResult ForgotPassword()
         {
-            // Usar el layout para usuarios no autenticados
-            ViewBag.Layout = "_LayoutUnauthenticated";
+            ViewBag.Layout = "_LayoutUnauthenticated";  // Usar el layout para usuarios no autenticados
             return View();
         }
+
+        [HttpGet]
+        [AllowAnonymous]
         public IActionResult ResetPassword()
         {
-            // Usar el layout para usuarios no autenticados
-            ViewBag.Layout = "_LayoutUnauthenticated";
+            ViewBag.Layout = "_LayoutUnauthenticated";  // Usar el layout para usuarios no autenticados
             return View();
         }
 
+        private async Task<bool> IsEmailExists(string email)
+        {
+            using (var connection = new SqlConnection("YourConnectionString"))
+            {
+                var query = "SELECT COUNT(*) FROM Users WHERE Email = @Email";
+                var command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@Email", email);
 
+                connection.Open();
+                var count = (int)await command.ExecuteScalarAsync();
+                return count > 0;
+            }
+        }
     }
 }
