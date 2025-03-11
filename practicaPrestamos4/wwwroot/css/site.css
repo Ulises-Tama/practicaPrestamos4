@@ -50,32 +50,25 @@ body {
     border-radius: 4px;
 }
 
-.btn {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    background-color: #007bff;
-    color: white;
-    cursor: pointer;
-}
 
-    .btn:hover {
-        background-color: #0056b3;
-    }
+
+.btn:hover {
+    background-color: #0056b3;
+}
 
 .login-links {
     margin-top: 15px;
     text-align: center;
 }
 
-    .login-links a {
-        color: #007bff;
-        text-decoration: none;
-    }
+.login-links a {
+    color: #007bff;
+    text-decoration: none;
+}
 
-        .login-links a:hover {
-            text-decoration: underline;
-        }
+.login-links a:hover {
+    text-decoration: underline;
+}
 
 .login-container,
 .register-container,
@@ -98,19 +91,6 @@ body {
     border: 1px solid #ccc;
     border-radius: 4px;
 }
-
-.btn {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    background-color: #007bff;
-    color: white;
-    cursor: pointer;
-}
-
-    .btn:hover {
-        background-color: #0056b3;
-    }
 
 .login-links,
 .register-links,

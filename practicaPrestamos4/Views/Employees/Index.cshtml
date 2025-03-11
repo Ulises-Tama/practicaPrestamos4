@@ -1,9 +1,12 @@
 ﻿@model IEnumerable<practicaPrestamos4.Entidades.Employee>
 
+@* @model IEnumerable<practicaPrestamos4.ViewModels.EmployeeWithLoansViewModel> *@
+
+
 
 <div class="card shadow-lg p-3 mb-5 bg-body rounded" >
     <div class="card-header">
-        Lista de Empleados
+        Lista de empleados
     </div>
     <div class="card-body">
         <a asp-action="Create" class="btn btn-primary float-end">Nuevo empleado</a>
@@ -63,40 +66,40 @@
                             }
                             else if (employee.EmployeeStatus == 2)
                             {
-                                <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal"
-                                        data-bs-target="#abonarModal-@employee.EmployeeId"
-                                        data-loanid="@employee.Loans.FirstOrDefault()?.LoanId">
-                                    Abonar
-                                </button>
+                                @* <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" *@
+                                @*         data-bs-target="#abonarModal-@employee.EmployeeId" *@
+                                @*         data-loanid="@employee.Loans.FirstOrDefault()?.LoanId"> *@
+                                @*     Abonar *@
+                                @* </button> *@
 
-                                <div class="modal fade" id="abonarModal-@employee.EmployeeId" tabindex="-1" 
-                                    aria-labelledby="abonarModalLabel" aria-hidden="true">
-                                    <div class="modal-dialog modal-dialog-centered" role="document">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="abonarModalLabel">Abonar al Préstamo</h5>
-                                                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                                                    <span aria-hidden="true">&times;</span>
-                                                </button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <form asp-action="Pay" method="post">
-                                                    <input type="hidden" name="loanId" id="loanId-@employee.EmployeeId" />
+                                @* <div class="modal fade" id="abonarModal-@employee.EmployeeId" tabindex="-1"  *@
+                                @*     aria-labelledby="abonarModalLabel" aria-hidden="true"> *@
+                                @*     <div class="modal-dialog modal-dialog-centered" role="document"> *@
+                                @*         <div class="modal-content"> *@
+                                @*             <div class="modal-header"> *@
+                                @*                 <h5 class="modal-title" id="abonarModalLabel">Abonar al Préstamo</h5> *@
+                                @*                 <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"> *@
+                                @*                     <span aria-hidden="true">&times;</span> *@
+                                @*                 </button> *@
+                                @*             </div> *@
+                                @*             <div class="modal-body"> *@
+                                @*                 <form asp-action="Pay" method="post"> *@
+                                @*                     <input type="hidden" name="loanId" id="loanId-@employee.EmployeeId" /> *@
 
-                                                    <div class="form-group">
-                                                        <label for="amount">Cantidad a Abonar</label>
-                                                        <input type="number" class="form-control" id="amount" name="amount" step="0.01" min="0" required />
-                                                    </div>
+                                @*                     <div class="form-group"> *@
+                                @*                         <label for="amount">Cantidad a Abonar</label> *@
+                                @*                         <input type="number" class="form-control" id="amount" name="amount" step="0.01" min="0" required /> *@
+                                @*                     </div> *@
 
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                                        <button type="submit" class="btn btn-primary">Abonar</button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                @*                     <div class="modal-footer"> *@
+                                @*                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button> *@
+                                @*                         <button type="submit" class="btn btn-primary">Abonar</button> *@
+                                @*                     </div> *@
+                                @*                 </form> *@
+                                @*             </div> *@
+                                @*         </div> *@
+                                @*     </div> *@
+                                @* </div> *@
                             }
                             else
                         {

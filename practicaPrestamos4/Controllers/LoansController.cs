@@ -84,6 +84,17 @@ namespace practicaPrestamos4.Controllers
                         Console.WriteLine($"Error en {key}: {state.Errors.First().ErrorMessage}");
                     }
                 }
+
+                // Si es una solicitud AJAX, devolver un JSON con los errores
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = false, errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage) });
+                }
+
+                // Si no es AJAX, recargar la vista con los datos necesarios
+                ViewBag.Employee = _context.Employees.Find(loan?.LoanEmployeeId);
+                ViewBag.PaymentTypes = _context.PaymentTypes.ToList();
+                return View(loan);
             }
 
             if (ModelState.IsValid)
@@ -123,10 +134,17 @@ namespace practicaPrestamos4.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                return RedirectToAction("Index", "Home");
+                // Si es una solicitud AJAX, devolver un JSON con éxito
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = true });
+                }
+
+                // Si no es AJAX, redirigir a la vista Index
+                return RedirectToAction("Index", "Loan");
             }
 
-            // Si el modelo no es válido, recargar la vista con los datos necesarios
+            // Si el modelo no es válido y no es AJAX, recargar la vista con los datos necesarios
             ViewBag.Employee = _context.Employees.Find(loan?.LoanEmployeeId);
             ViewBag.PaymentTypes = _context.PaymentTypes.ToList();
             return View(loan);
@@ -137,14 +155,29 @@ namespace practicaPrestamos4.Controllers
         {
             // Obtener el ID del usuario desde las claims
             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            Console.WriteLine($"usuario: {userIdString}");
+            Console.WriteLine($"Usuario ID desde claims: {userIdString}");
+
+            if (string.IsNullOrEmpty(userIdString))
+            {
+                Console.WriteLine("El usuario no está autenticado o no tiene un NameIdentifier.");
+                return 0; // Si no está autenticado o no tiene un ID válido
+            }
 
             if (int.TryParse(userIdString, out int userId))
             {
+                // Verificar que el usuario exista en la base de datos
+                var userExists = _context.Users.Any(u => u.Id == userId);
+                if (!userExists)
+                {
+                    Console.WriteLine($"El usuario con ID {userId} no existe en la base de datos.");
+                    return 0; // Si el usuario no existe
+                }
+
                 return userId;
             }
 
-            return 0; // Si no encuentra el usuario o no está autenticado
+            Console.WriteLine($"El ID del usuario no es un número válido: {userIdString}");
+            return 0; // Si el ID no es un número válido
         }
 
         [HttpPost]
@@ -217,6 +250,43 @@ namespace practicaPrestamos4.Controllers
             return RedirectToAction("Index");
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetEmployeesAndPaymentTypes()
+        {
+            var employees = await _context.Employees
+                .Select(e => new
+                {
+                    e.EmployeeId,
+                    FullName = $"{e.EmployeeName} {e.EmployeeLastname1} {e.EmployeeLastname2}"
+                })
+                .ToListAsync();
+
+            var paymentTypes = await _context.PaymentTypes
+                .Select(p => new
+                {
+                    p.PaymentTypeId,
+                    p.ShortName,
+                    p.Description
+                })
+                .ToListAsync();
+
+            return Json(new { employees, paymentTypes });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> SearchEmployees(string searchTerm)
+        {
+            var employees = await _context.Employees
+                .Where(e => e.EmployeeName.Contains(searchTerm)) // Filtrar por nombre
+                .Select(e => new
+                {
+                    id = e.EmployeeId,
+                    text = $"{e.EmployeeName} {e.EmployeeLastname1} {e.EmployeeLastname2}"
+                })
+                .ToListAsync();
+
+            return Json(new { employees });
+        }
 
     }
 }

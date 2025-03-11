@@ -4,6 +4,8 @@ using practicaPrestamos4.Data;
 using practicaPrestamos4.Entidades;
 using System.Collections.Generic;
 using System.Linq;
+using practicaPrestamos4.ViewModels; 
+
 
 namespace practicaPrestamos4.Controllers
 {
@@ -18,32 +20,30 @@ namespace practicaPrestamos4.Controllers
 
         public IActionResult Index()
         {
-
             //var employees = _context.Employees
             //    .Where(e => e.EmployeeStatus != 3) // Solo empleados activos
             //    .Include(e => e.Loans) // Incluir los préstamos
-            //    .ToList() // Convertirlo en lista (sin await)
-            //    .Select(e => new
+            //    .ToList() // Convertir a lista (sin await)
+            //    .Select(e => new EmployeeWithLoansViewModel
             //    {
-            //        e.EmployeeId,
-            //        e.PayrollNumber,
-            //        e.EmployeeName,
-            //        e.EmployeeLastname1,
-            //        e.EmployeeLastname2,
-            //        e.EmployeeStatus,
+            //        EmployeeId = e.EmployeeId,
+            //        PayrollNumber = e.PayrollNumber,
+            //        EmployeeName = e.EmployeeName,
+            //        EmployeeLastname1 = e.EmployeeLastname1,
+            //        EmployeeLastname2 = e.EmployeeLastname2,
+            //        EmployeeStatus = e.EmployeeStatus,
             //        ActiveLoans = e.Loans
-            //            .Where(l => l.LoanBalance > 0 && l.LoanBalance < l.LoanTotalAmountToPay) // Solo préstamos no pagados
-            //            .Select(l => new
+            //            .Where(l => l.LoanBalance > 0 && l.LoanBalance < l.LoanTotalAmountToPay)
+            //            .Select(l => new LoanViewModel
             //            {
-            //                l.LoanId,
-            //                l.LoanTotalAmountToPay,
-            //                l.LoanTotalAmountToPayLate,
-            //                l.LoanBalance
+            //                LoanId = l.LoanId,
+            //                LoanTotalAmountToPay = l.LoanTotalAmountToPay,
+            //                LoanTotalAmountToPayLate = l.LoanTotalAmountToPayLate,
+            //                LoanBalance = l.LoanBalance
             //            })
             //            .ToList()
             //    })
             //    .ToList();
-
 
             var employees = _context.Employees
                 .Where(e => e.EmployeeStatus != 3)
