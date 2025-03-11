@@ -53,8 +53,8 @@ namespace practicaPrestamos4.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
-            [Bind("LoanId,LoanEmployeeId,LoanAmount,LoanTotalAmountToPay,LoanTotalAmountToPayLate,LoanApprovedInterest,LoanLateInterest,LoanPaymentTypeId,LoanFirstPaymentDate,LoanTotalPaidCapital,LoanTotalPaidInterest,LoanBalance,LoanFinalPaymentDate,LoanUserId,LoanNotes,CreatedAt,UpdatedAt")]
-            Loan loan)
+    [Bind("LoanId,LoanEmployeeId,LoanAmount,LoanTotalAmountToPay,LoanTotalAmountToPayLate,LoanApprovedInterest,LoanLateInterest,LoanPaymentTypeId,LoanFirstPaymentDate,LoanTotalPaidCapital,LoanTotalPaidInterest,LoanBalance,LoanFinalPaymentDate,LoanUserId,LoanNotes,CreatedAt,UpdatedAt")]
+    Loan loan)
         {
             Console.WriteLine("Checa modelo");
 
@@ -114,6 +114,15 @@ namespace practicaPrestamos4.Controllers
                 _context.Loans.Add(loan);
                 await _context.SaveChangesAsync();
 
+                // Actualizar el EmployeeStatus del empleado a 2 (Préstamo activo)
+                var employee = await _context.Employees.FindAsync(loan.LoanEmployeeId);
+                if (employee != null)
+                {
+                    employee.EmployeeStatus = 2; // 2 = Préstamo activo
+                    _context.Employees.Update(employee);
+                    await _context.SaveChangesAsync();
+                }
+
                 return RedirectToAction("Index", "Home");
             }
 
@@ -140,7 +149,7 @@ namespace practicaPrestamos4.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Pay(long loanId, decimal amount) // Asegúrate de que loanId sea de tipo long
+        public async Task<IActionResult> Pay(long loanId, decimal amount)
         {
             if (amount <= 0)
             {
@@ -151,7 +160,7 @@ namespace practicaPrestamos4.Controllers
             // Obtener el préstamo
             var loan = await _context.Loans
                 .Include(l => l.LoanHistories) // Incluir el historial si es necesario
-                .FirstOrDefaultAsync(l => l.LoanId == loanId); // Usar FirstOrDefaultAsync en lugar de Find
+                .FirstOrDefaultAsync(l => l.LoanId == loanId);
 
             if (loan == null)
             {
@@ -192,7 +201,22 @@ namespace practicaPrestamos4.Controllers
             // Guardar los cambios en la base de datos
             await _context.SaveChangesAsync();
 
+            // Verificar si el préstamo está completamente liquidado
+            if (loan.LoanTotalPaidCapital >= loan.LoanTotalAmountToPay)
+            {
+                // Actualizar el EmployeeStatus del empleado a 1 (Préstamo liquidado)
+                var employee = await _context.Employees.FindAsync(loan.LoanEmployeeId);
+                if (employee != null)
+                {
+                    employee.EmployeeStatus = 1; // 1 = Préstamo liquidado
+                    _context.Employees.Update(employee);
+                    await _context.SaveChangesAsync();
+                }
+            }
+
             return RedirectToAction("Index");
         }
+
+
     }
 }

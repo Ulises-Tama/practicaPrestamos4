@@ -42,6 +42,7 @@ namespace practicaPrestamos4.Entidades
 
 
         // Relación con Loan
-        public ICollection<Loan>? Loans { get; set; }  // Colección de préstamos
+        public ICollection<Loan> Loans { get; set; } = new List<Loan>();
+
     }
 }

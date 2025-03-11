@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using practicaPrestamos4.Data;
 using practicaPrestamos4.Entidades;
 using System.Collections.Generic;
@@ -17,12 +18,51 @@ namespace practicaPrestamos4.Controllers
 
         public IActionResult Index()
         {
-            // Filtrar empleados donde EmployeeStatus no sea igual a 3
+
+            //var employees = _context.Employees
+            //    .Where(e => e.EmployeeStatus != 3) // Solo empleados activos
+            //    .Include(e => e.Loans) // Incluir los préstamos
+            //    .ToList() // Convertirlo en lista (sin await)
+            //    .Select(e => new
+            //    {
+            //        e.EmployeeId,
+            //        e.PayrollNumber,
+            //        e.EmployeeName,
+            //        e.EmployeeLastname1,
+            //        e.EmployeeLastname2,
+            //        e.EmployeeStatus,
+            //        ActiveLoans = e.Loans
+            //            .Where(l => l.LoanBalance > 0 && l.LoanBalance < l.LoanTotalAmountToPay) // Solo préstamos no pagados
+            //            .Select(l => new
+            //            {
+            //                l.LoanId,
+            //                l.LoanTotalAmountToPay,
+            //                l.LoanTotalAmountToPayLate,
+            //                l.LoanBalance
+            //            })
+            //            .ToList()
+            //    })
+            //    .ToList();
+
+
             var employees = _context.Employees
                 .Where(e => e.EmployeeStatus != 3)
+                .Include(e => e.Loans) // Incluir los préstamos asociados al empleado
                 .ToList();
 
+            //var employees = _context.Employees
+            //    .Where(e => e.EmployeeStatus != 3) // Filtrar empleados con estado menor a 3
+            //    .Select(e => new
+            //    {
+            //        Employee = e,
+            //        ActiveLoans = e.Loans.Where(l => l.LoanBalance < l.LoanTotalAmountToPay).ToList() // Filtrar préstamos no pagados
+            //    })
+            //    .Where(e => e.ActiveLoans.Any()) // Solo incluir empleados con préstamos activos
+            //    .Select(e => e.Employee)
+            //    .ToList();
+
             return View(employees);
+
         }
 
         public IActionResult Create()

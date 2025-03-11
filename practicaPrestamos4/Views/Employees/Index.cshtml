@@ -63,7 +63,40 @@
                             }
                             else if (employee.EmployeeStatus == 2)
                             {
-                                <button type="button" class="btn btn-danger btn-sm">Préstamo activo</button>
+                                <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal"
+                                        data-bs-target="#abonarModal-@employee.EmployeeId"
+                                        data-loanid="@employee.Loans.FirstOrDefault()?.LoanId">
+                                    Abonar
+                                </button>
+
+                                <div class="modal fade" id="abonarModal-@employee.EmployeeId" tabindex="-1" 
+                                    aria-labelledby="abonarModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="abonarModalLabel">Abonar al Préstamo</h5>
+                                                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form asp-action="Pay" method="post">
+                                                    <input type="hidden" name="loanId" id="loanId-@employee.EmployeeId" />
+
+                                                    <div class="form-group">
+                                                        <label for="amount">Cantidad a Abonar</label>
+                                                        <input type="number" class="form-control" id="amount" name="amount" step="0.01" min="0" required />
+                                                    </div>
+
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                        <button type="submit" class="btn btn-primary">Abonar</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             }
                             else
                         {
@@ -92,4 +125,28 @@
             });
         });
     </script>
+
+    <script>
+        $(document).ready(function () {
+            // Usar el selector correcto para Bootstrap 5
+            $('button[data-bs-target^="#abonarModal"]').on('click', function () {
+                console.log("Entró a la función");
+
+                // Obtener el LoanId del botón
+                var loanId = $(this).data('loanid');
+                console.log("LoanId:", loanId);
+
+                var loanBalance = $(this).data('loanBalance');
+                console.log("LoanBalance:", loanBalance);
+
+                // Obtener el EmployeeId del botón
+                var employeeId = $(this).data('bs-target').replace('#abonarModal-', '');
+                console.log("EmployeeId:", employeeId);
+
+                // Asignar el LoanId al campo oculto del modal correspondiente
+                $('#loanId-' + employeeId).val(loanId);
+            });
+        });
+    </script>
+
 }
