@@ -12,20 +12,22 @@ namespace practicaPrestamos4.Entidades
 
         [Required]
         [Display(Name = "ID del empleado")]
-
         public long LoanEmployeeId { get; set; }  // LoanEmployeeId (bigint, foreign key)
 
         [Required]
         [Column(TypeName = "decimal(18, 2)")]
         [Display(Name = "Monto del préstamo")]
-
         public decimal LoanAmount { get; set; }  // LoanAmount (decimal(18, 2))
 
         [Required]
         [Column(TypeName = "decimal(18, 2)")]
         [Display(Name = "Monto total a pagar")]
-
         public decimal LoanTotalAmountToPay { get; set; }  // LoanTotalAmountToPay (decimal(18, 2))
+
+        [Required]
+        [Column(TypeName = "decimal(18, 2)")]
+        [Display(Name = "Monto total a pagar con interés moroso")]
+        public decimal LoanTotalAmountToPayLate { get; set; }  // LoanTotalAmountToPayLate (decimal(18, 2))
 
         [Required]
         [Column(TypeName = "decimal(18, 2)")]
@@ -64,7 +66,6 @@ namespace practicaPrestamos4.Entidades
         [Display(Name = "Fecha del último pago")]
         public DateTime? LoanFinalPaymentDate { get; set; }  // LoanFinalPaymentDate (datetime, nullable)
 
-        [Required]
         [Display(Name = "ID del admin")]
         public int LoanUserId { get; set; }  // LoanUserId (bigint, foreign key)
 
@@ -80,13 +81,10 @@ namespace practicaPrestamos4.Entidades
         public DateTime? UpdatedAt { get; set; } = DateTime.UtcNow;  // UpdatedAt (datetime, DEFAULT GETUTCDATE() ON UPDATE CURRENT_TIMESTAMP)
 
         // Relaciones
-        [Display(Name = "Empleado")]
         public Employee Employee { get; set; }  // Relación con Employee
 
-        [Display(Name = "Tipo de pago")]
         public PaymentType PaymentTypes { get; set; }  // Relación con PaymentTypes
 
-        [Display(Name = "Admin")]
         public User User { get; set; }  // Relación con User (Autor)
     }
 }

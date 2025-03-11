@@ -13,6 +13,7 @@ namespace practicaPrestamos4.Data
         {
         }
 
+
         // DbSet para la entidad User
         public DbSet<User> Users { get; set; } = null!;
 
@@ -63,7 +64,6 @@ namespace practicaPrestamos4.Data
                 .WithMany(e => e.Loans)  // Un empleado puede tener muchos préstamos
                 .HasForeignKey(l => l.LoanEmployeeId);  // Clave foránea
 
-            base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<Loan>()
                 .HasOne(l => l.User)  // Un préstamo tiene un autor (usuario)

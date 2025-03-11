@@ -4,8 +4,6 @@
     var paymentTypes = ViewBag.PaymentTypes as List<practicaPrestamos4.Entidades.PaymentType>;
 }
 
-
-
 <div class="card shadow-lg p-3 mb-5 bg-body rounded">
     <div class="card-header">
         Nuevo Préstamo para @employee.EmployeeName @employee.EmployeeLastname1 @employee.EmployeeLastname2
@@ -18,65 +16,73 @@
         <form asp-action="Create" method="post">
             <input type="hidden" asp-for="LoanEmployeeId" value="@employee.EmployeeId" />
 
-            <!-- Monto del Préstamo -->
-            <div class="form-group">
-                <label asp-for="LoanAmount" class="control-label"></label>
-                <input asp-for="LoanAmount" class="form-control" id="loanAmount" />
-                <span asp-validation-for="LoanAmount" class="text-danger"></span>
+            <div class="row">
+                <!-- Monto del Préstamo -->
+                <div class="form-group col-6">
+                    <label asp-for="LoanAmount" class="control-label"></label>
+                    <input asp-for="LoanAmount" class="form-control" id="loanAmount" step="0.01"/>
+                    <span asp-validation-for="LoanAmount" class="text-danger"></span>
+                </div>
+
+                <!-- Tipo de Pago -->
+                <div class="form-group col-6">
+                    <label asp-for="LoanPaymentTypeId" class="control-label"></label>
+                    <select asp-for="LoanPaymentTypeId" class="form-control" id="paymentType">
+                        @foreach (var paymentType in paymentTypes)
+                        {
+                            <option value="@paymentType.PaymentTypeId">@paymentType.ShortName (@paymentType.Description)</option>
+                        }
+                    </select>
+                    <span asp-validation-for="LoanPaymentTypeId" class="text-danger"></span>
+                </div>
+
+                <!-- Fecha del Primer Pago -->
+                <div class="form-group col-6" id="firstPaymentDateGroup">
+                    <label asp-for="LoanFirstPaymentDate" class="control-label"></label>
+                    <input asp-for="LoanFirstPaymentDate" class="form-control" type="date" id="firstPaymentDate" />
+                    <span asp-validation-for="LoanFirstPaymentDate" class="text-danger"></span>
+                </div>
+
+                <!-- Fecha del Último Pago -->
+                <div class="form-group col-6">
+                    <label asp-for="LoanFinalPaymentDate" class="control-label"></label>
+                    <input asp-for="LoanFinalPaymentDate" class="form-control" type="date" id="finalPaymentDate" />
+                    <span asp-validation-for="LoanFinalPaymentDate" class="text-danger"></span>
+                </div>
+
+                <!-- Intereses Aprobados -->
+                <div class="form-group col-6">
+                    <label asp-for="LoanApprovedInterest" class="control-label"></label>
+                    <input asp-for="LoanApprovedInterest" class="form-control" id="approvedInterest" />
+                    <span asp-validation-for="LoanApprovedInterest" class="text-danger"></span>
+                </div>
+
+                <!-- Intereses Moratorios -->
+                <div class="form-group col-6">
+                    <label asp-for="LoanLateInterest" class="control-label"></label>
+                    <input asp-for="LoanLateInterest" class="form-control" id="lateInterest" />
+                    <span asp-validation-for="LoanLateInterest" class="text-danger"></span>
+                </div>
+
+                <!-- Cantidad Total a Pagar (Calculada) -->
+                <div class="form-group col-6">
+                    <label class="control-label">Cantidad Total a Pagar</label>
+                    <input class="form-control" id="totalAmountToPay" readonly />
+                </div>
+                <!-- Cantidad Total a Pagar (Moratorio) -->
+                <div class="form-group col-6">
+                    <label class="control-label">Cantidad Total a Pagar (Moratorio)</label>
+                    <input class="form-control" id="totalAmountToPayLate" readonly />
+                </div>
+
+                <!-- Notas -->
+                <div class="form-group">
+                    <label asp-for="LoanNotes" class="control-label"></label>
+                    <textarea asp-for="LoanNotes" class="form-control"></textarea>
+                    <span asp-validation-for="LoanNotes" class="text-danger"></span>
+                </div>
             </div>
 
-            <!-- Tipo de Pago -->
-            <div class="form-group">
-                <label asp-for="LoanPaymentTypeId" class="control-label"></label>
-                <select asp-for="LoanPaymentTypeId" class="form-control" id="paymentType">
-                    @foreach (var paymentType in paymentTypes)
-                    {
-                        <option value="@paymentType.PaymentTypeId">@paymentType.ShortName</option>
-                    }
-                </select>
-                <span asp-validation-for="LoanPaymentTypeId" class="text-danger"></span>
-            </div>
-
-            <!-- Fecha del Primer Pago -->
-            <div class="form-group" id="firstPaymentDateGroup">
-                <label asp-for="LoanFirstPaymentDate" class="control-label"></label>
-                <input asp-for="LoanFirstPaymentDate" class="form-control" type="date" id="firstPaymentDate" />
-                <span asp-validation-for="LoanFirstPaymentDate" class="text-danger"></span>
-            </div>
-
-            <!-- Fecha del Último Pago -->
-            <div class="form-group">
-                <label asp-for="LoanFinalPaymentDate" class="control-label"></label>
-                <input asp-for="LoanFinalPaymentDate" class="form-control" type="date" id="finalPaymentDate" />
-                <span asp-validation-for="LoanFinalPaymentDate" class="text-danger"></span>
-            </div>
-
-            <!-- Intereses Aprobados -->
-            <div class="form-group">
-                <label asp-for="LoanApprovedInterest" class="control-label"></label>
-                <input asp-for="LoanApprovedInterest" class="form-control" id="approvedInterest" />
-                <span asp-validation-for="LoanApprovedInterest" class="text-danger"></span>
-            </div>
-
-            <!-- Intereses Moratorios -->
-            <div class="form-group">
-                <label asp-for="LoanLateInterest" class="control-label"></label>
-                <input asp-for="LoanLateInterest" class="form-control" id="lateInterest" />
-                <span asp-validation-for="LoanLateInterest" class="text-danger"></span>
-            </div>
-
-            <!-- Cantidad Total a Pagar (Calculada) -->
-            <div class="form-group">
-                <label class="control-label">Cantidad Total a Pagar</label>
-                <input class="form-control" id="totalAmountToPay" readonly />
-            </div>
-
-            <!-- Notas -->
-            <div class="form-group">
-                <label asp-for="LoanNotes" class="control-label"></label>
-                <textarea asp-for="LoanNotes" class="form-control"></textarea>
-                <span asp-validation-for="LoanNotes" class="text-danger"></span>
-            </div>
 
             <div class="form-group">
                 <input type="submit" value="Crear Préstamo" class="btn btn-primary" />
@@ -97,9 +103,11 @@
             const paymentTypeSelect = document.getElementById('paymentType');
             const firstPaymentDateGroup = document.getElementById('firstPaymentDateGroup');
             const firstPaymentDateInput = document.getElementById('firstPaymentDate');
+            const finalPaymentDateInput = document.getElementById('finalPaymentDate');
             const approvedInterestInput = document.getElementById('approvedInterest');
             const lateInterestInput = document.getElementById('lateInterest');
             const totalAmountToPayInput = document.getElementById('totalAmountToPay');
+            const totalAmountToPayLateInput = document.getElementById('totalAmountToPayLate');
 
             // Ocultar/mostrar la fecha del primer pago según el tipo de pago
             paymentTypeSelect.addEventListener('change', function () {
@@ -118,15 +126,35 @@
                 const approvedInterest = parseFloat(approvedInterestInput.value) || 0;
                 const lateInterest = parseFloat(lateInterestInput.value) || 0;
 
-                const totalInterest = approvedInterest + lateInterest;
-                const totalAmount = loanAmount + (loanAmount * (totalInterest / 100));
+                // Calcular el monto total a pagar sin intereses moratorios
+                const totalAmount = loanAmount + (loanAmount * (approvedInterest / 100));
 
+                // Calcular el monto total a pagar con intereses moratorios
+                const totalAmountLate = totalAmount + (loanAmount * (lateInterest / 100));
+
+                // Mostrar los montos en los campos correspondientes
                 totalAmountToPayInput.value = totalAmount.toFixed(2);
+                totalAmountToPayLateInput.value = totalAmountLate.toFixed(2);
             }
 
+            // Validar la fecha del último pago
+            finalPaymentDateInput.addEventListener('change', function () {
+                const firstPaymentDate = new Date(firstPaymentDateInput.value);
+                const finalPaymentDate = new Date(finalPaymentDateInput.value);
+
+                if (finalPaymentDate <= firstPaymentDate) {
+                    alert('La fecha del último pago debe ser posterior a la fecha del primer pago.');
+                    finalPaymentDateInput.value = ''; // Limpiar el campo
+                }
+            });
+
+            // Escuchar cambios en los campos relevantes
             loanAmountInput.addEventListener('input', calculateTotalAmount);
             approvedInterestInput.addEventListener('input', calculateTotalAmount);
             lateInterestInput.addEventListener('input', calculateTotalAmount);
+
+            // Calcular la cantidad total a pagar al cargar la página
+            calculateTotalAmount();
         });
     </script>
 }

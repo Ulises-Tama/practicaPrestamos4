@@ -1,4 +1,11 @@
+using Microsoft.EntityFrameworkCore;
+using practicaPrestamos4.Data;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Configuración de la base de datos
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -8,6 +15,7 @@ builder.Services.AddAuthentication("CookieAuth")
     .AddCookie("CookieAuth", options =>
     {
         options.LoginPath = "/Account/Login"; // Ruta para el login
+        options.LogoutPath = "/Account/Logout"; // Ruta para el logout
         options.AccessDeniedPath = "/Account/AccessDenied"; // Ruta para acceso denegado
     });
 
@@ -40,6 +48,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Account}/{action=Login}/{id?}");
 
 app.Run();
