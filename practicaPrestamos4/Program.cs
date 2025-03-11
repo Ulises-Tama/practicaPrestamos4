@@ -5,7 +5,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Configuración de la base de datos
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlServerOptions => sqlServerOptions.EnableRetryOnFailure()
+    )
+    .EnableSensitiveDataLogging() // Habilita el registro de datos sensibles
+    .EnableDetailedErrors() // Habilita errores detallados
+);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -48,6 +54,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Account}/{action=Login}/{id?}");
+    pattern: "{controller=Account}/{action=Login}");
 
 app.Run();

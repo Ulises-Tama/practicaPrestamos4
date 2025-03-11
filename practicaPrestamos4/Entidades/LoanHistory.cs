@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.CompilerServices;
 
 namespace practicaPrestamos4.Entidades
 {
@@ -36,5 +37,7 @@ namespace practicaPrestamos4.Entidades
         // Estilo Laravel: CreatedAt y UpdatedAt
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
+
+
     }
 }

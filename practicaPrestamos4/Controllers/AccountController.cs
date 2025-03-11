@@ -31,22 +31,24 @@ namespace practicaPrestamos4.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(string email, string password, string returnUrl = null)
         {
-            if (IsValidUser(email, password))
+            Console.WriteLine($" campos del login son: {email}, {password}, {returnUrl}");
+            if (IsValidUser(email, password, out var userId)) // Modifica IsValidUser para devolver el ID del usuario
             {
                 var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Email, email),
-                    new Claim(ClaimTypes.Name, email)
-                };
+        {
+            new Claim(ClaimTypes.Email, email),
+            new Claim(ClaimTypes.Name, email),
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString()) // Agrega el ID del usuario como Claim
+        };
 
-                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var claimsIdentity = new ClaimsIdentity(claims, "CookieAuth"); // Usa el mismo esquema
                 var authProperties = new AuthenticationProperties
                 {
                     IsPersistent = true
                 };
 
                 await HttpContext.SignInAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    "CookieAuth", // Usa el mismo esquema
                     new ClaimsPrincipal(claimsIdentity),
                     authProperties);
 
@@ -65,15 +67,17 @@ namespace practicaPrestamos4.Controllers
         [HttpPost]
         public async Task<IActionResult> Logout()
         {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignOutAsync("CookieAuth"); // Usa el mismo esquema que configuraste
             return RedirectToAction("Login");
         }
 
-        private bool IsValidUser(string email, string password)
+        private bool IsValidUser(string email, string password, out int userId)
         {
-            using (var connection = new SqlConnection("YourConnectionString"))
+            userId = 0; // Inicializa el ID del usuario
+
+            using (var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
             {
-                var query = "SELECT Password FROM Users WHERE Email = @Email";
+                var query = "SELECT Id, Password FROM Users WHERE Email = @Email";
                 var command = new SqlCommand(query, connection);
                 command.Parameters.AddWithValue("@Email", email);
 
@@ -82,7 +86,11 @@ namespace practicaPrestamos4.Controllers
                 if (reader.Read())
                 {
                     var storedPassword = reader["Password"].ToString();
-                    return password == storedPassword; // Comparación directa de contraseñas
+                    if (password == storedPassword) // Comparación directa de contraseñas
+                    {
+                        userId = Convert.ToInt32(reader["Id"]); // Obtén el ID del usuario
+                        return true;
+                    }
                 }
                 return false;
             }

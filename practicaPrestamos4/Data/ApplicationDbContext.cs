@@ -26,9 +26,14 @@ namespace practicaPrestamos4.Data
         // DbSet para la entidad PaymentTypess
         public DbSet<PaymentType> PaymentTypes { get; set; }
 
+        public DbSet<LoanHistory> LoanHistories { get; set; } 
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<LoanHistory>().ToTable("LoanHistory"); // Usar el nombre correcto de la tabla
 
             // Configuración para la entidad User
             modelBuilder.Entity<User>()
@@ -83,6 +88,18 @@ namespace practicaPrestamos4.Data
                 .Property(l => l.UpdatedAt)
                 .HasDefaultValueSql("GETUTCDATE()")  // Valor por defecto para UpdatedAt
                 .ValueGeneratedOnAddOrUpdate();  // Actualizar automáticamente al insertar o modificar
+
+            // Configuración de la relación entre Loan y LoanHistory
+            modelBuilder.Entity<LoanHistory>()
+                .HasOne(lh => lh.Loan) // Un LoanHistory pertenece a un Loan
+                .WithMany(l => l.LoanHistories) // Un Loan puede tener muchos LoanHistories
+                .HasForeignKey(lh => lh.LoanId); // Clave foránea en LoanHistory
+
+            // Configuración de la relación entre LoanHistory y User
+            modelBuilder.Entity<LoanHistory>()
+                .HasOne(lh => lh.User)
+                .WithMany()
+                .HasForeignKey(lh => lh.LoanHistoryUserId);
 
             modelBuilder.Entity<PaymentType>().HasData(
                 new PaymentType

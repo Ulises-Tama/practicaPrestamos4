@@ -19,7 +19,18 @@ namespace practicaPrestamos4.Controllers
             _context = context;
         }
 
-        // GET: Loans/Create
+        public async Task<IActionResult> Index()
+        {
+            // Obtener la lista de préstamos desde la base de datos
+            var loans = await _context.Loans
+                .Include(l => l.Employee) // Incluir la relación con Employee
+                .Include(l => l.PaymentTypes) // Incluir la relación con PaymentTypes
+                .Include(l => l.User) // Incluir la relación con User
+                .ToListAsync();
+
+            return View(loans); // Pasar la lista de préstamos a la vista
+        }
+
         public IActionResult Create(long employeeId)
         {
             // Obtener el empleado por su ID
@@ -41,7 +52,9 @@ namespace practicaPrestamos4.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("LoanId,LoanEmployeeId,LoanAmount,LoanTotalAmountToPay,LoanTotalAmountToPayLate,LoanApprovedInterest,LoanLateInterest,LoanPaymentTypeId,LoanFirstPaymentDate,LoanTotalPaidCapital,LoanTotalPaidInterest,LoanBalance,LoanFinalPaymentDate,LoanUserId,LoanNotes,CreatedAt,UpdatedAt")] Loan loan)
+        public async Task<IActionResult> Create(
+            [Bind("LoanId,LoanEmployeeId,LoanAmount,LoanTotalAmountToPay,LoanTotalAmountToPayLate,LoanApprovedInterest,LoanLateInterest,LoanPaymentTypeId,LoanFirstPaymentDate,LoanTotalPaidCapital,LoanTotalPaidInterest,LoanBalance,LoanFinalPaymentDate,LoanUserId,LoanNotes,CreatedAt,UpdatedAt")]
+            Loan loan)
         {
             Console.WriteLine("Checa modelo");
 
@@ -123,6 +136,63 @@ namespace practicaPrestamos4.Controllers
             }
 
             return 0; // Si no encuentra el usuario o no está autenticado
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Pay(long loanId, decimal amount) // Asegúrate de que loanId sea de tipo long
+        {
+            if (amount <= 0)
+            {
+                ModelState.AddModelError("", "La cantidad a abonar debe ser mayor que cero.");
+                return RedirectToAction("Index");
+            }
+
+            // Obtener el préstamo
+            var loan = await _context.Loans
+                .Include(l => l.LoanHistories) // Incluir el historial si es necesario
+                .FirstOrDefaultAsync(l => l.LoanId == loanId); // Usar FirstOrDefaultAsync en lugar de Find
+
+            if (loan == null)
+            {
+                return NotFound();
+            }
+
+            // Verificar que el monto a abonar no exceda el saldo pendiente
+            decimal saldoPendiente = loan.LoanTotalAmountToPay - loan.LoanTotalPaidCapital;
+            if (amount > saldoPendiente)
+            {
+                ModelState.AddModelError("", "La cantidad a abonar excede el saldo pendiente.");
+                return RedirectToAction("Index");
+            }
+
+            // Guardar el valor antiguo del capital pagado
+            decimal oldCapitalPaid = loan.LoanTotalPaidCapital;
+
+            // Actualizar el préstamo
+            loan.LoanTotalPaidCapital += amount;
+            loan.LoanBalance = loan.LoanTotalAmountToPayLate - loan.LoanTotalPaidCapital;
+            loan.UpdatedAt = DateTime.UtcNow;
+
+            // Crear un registro en LoanHistory
+            var loanHistory = new LoanHistory
+            {
+                LoanId = loanId,
+                LoanHistoryUserId = GetCurrentUserId(), // Obtener el ID del usuario actual
+                FieldChanged = "LoanTotalPaidCapital", // Campo modificado
+                OldValue = oldCapitalPaid.ToString("N2"), // Valor antiguo
+                NewValue = loan.LoanTotalPaidCapital.ToString("N2"), // Valor nuevo
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            // Agregar el historial al contexto
+            _context.LoanHistories.Add(loanHistory);
+
+            // Guardar los cambios en la base de datos
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Index");
         }
     }
 }

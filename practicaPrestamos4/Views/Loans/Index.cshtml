@@ -1,0 +1,174 @@
+﻿@model IEnumerable<practicaPrestamos4.Entidades.Loan>
+
+@{
+    ViewData["Title"] = "Préstamos";
+}
+
+
+
+<div class="card shadow-lg mb-5 bg-body rounded">
+    <div class="card-header">
+        Préstamos
+    </div>
+    <div class="card-body">
+
+        <a asp-action="OldLoans" class="btn btn-primary float-end">Prestamos terminados</a>
+        <br />
+        <br />
+        <br />
+        <table id="loansTable" class="table table-striped dt-responsive nowrap table-bordered" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Empleado</th>
+                    <th>Monto</th>
+                    <th>Total pagado</th>
+                    <th>Tipo de Pago</th>
+                    <th>Fecha de Creación</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var loan in Model)
+                {
+                        <tr>
+                            <td>@loan.Employee?.EmployeeName</td>
+                            <td>@loan.LoanAmount.ToString("C")</td>
+                            <td>@loan.LoanTotalPaidCapital.ToString("C")</td>
+                            <td>@loan.PaymentTypes?.ShortName</td>
+                            <td>@loan.CreatedAt.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#debtPayment-@loan.LoanId">
+                                    Abonar
+                                </button>
+                                |
+                                <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#detailsModal-@loan.LoanId">
+                                    Info
+                                </button>
+                            
+                            </td>
+                        </tr>
+                        @* modal de abonos *@
+                        <div class="modal fade" id="debtPayment-@loan.LoanId" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header bet">
+                                    <h5 class="modal-title" id="detailsModalLabel">Abonar al préstamo</h5>
+                                        <button type="button" class="close align-self-end align-content-end align-items-md-end" data-bs-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form asp-action="Pay" method="post">
+                                            <input type="hidden" name="LoanId" value="@loan.LoanId" />
+
+                                            <div class="form-group">
+                                                <label for="amount">Cantidad a Abonar</label>
+                                                <input type="number" class="form-control" id="amount" name="amount" step="0.01" min="0" max="@(loan.LoanTotalAmountToPay - loan.LoanTotalPaidCapital)" required />
+                                                <small class="form-text text-muted">
+                                                    Saldo pendiente: @((loan.LoanTotalAmountToPay - loan.LoanTotalPaidCapital).ToString("C"))
+                                                </small>
+                                            </div>
+
+                                            <div class="modal-footer">
+                                                <div class="form-group form-check">
+                                                    <input type="checkbox" class="form-check-input" id="confirmData@loan.LoanId" name="confirmData" required />
+                                                    <label class="form-check-label" for="confirmData@loan.LoanId">
+                                                        Por favor, confirma que los datos son correctos antes de continuar.
+                                                    </label>
+                                                    <span class="text-danger" id="confirmDataError" style="display: none;">Debes confirmar que los datos son correctos.</span>
+                                                </div>
+                                                <br />
+                                                <br />
+                                                <br />
+                                                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
+
+                                                <button type="submit" class="btn btn-primary">Abonar</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        @* modal de deltalles *@
+                        <div class="modal fade" id="detailsModal-@loan.LoanId" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header bet">
+                                        <h5 class="modal-title" id="detailsModalLabel">Detalles del préstamo</h5>
+                                    <button type="button" class="close align-self-end align-content-end align-items-md-end" data-bs-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                    <dl class="row">
+
+                                        <dt class="col-sm-4">Interés aprobado</dt>
+                                        <dd class="col-sm-8">@loan.LoanApprovedInterest.ToString("N2") %</dd>
+
+                                        <dt class="col-sm-4">Interés moratorio</dt>
+                                        <dd class="col-sm-8">@loan.LoanLateInterest.ToString("N2") %</dd>
+
+                                        <dt class="col-sm-4">Admin</dt>
+                                        <dd class="col-sm-8">@loan.User?.Name</dd>
+
+                                        <dt class="col-sm-4">Notas</dt>
+                                        <dd class="col-sm-8">@loan.LoanNotes</dd>
+
+                                        <!-- Campos adicionales -->
+                                        <dt class="col-sm-4">Monto total a pagar</dt>
+                                        <dd class="col-sm-8">@loan.LoanTotalAmountToPay.ToString("C")</dd>
+
+                                        <dt class="col-sm-4">Monto total a tagar (moratorio)</dt>
+                                        <dd class="col-sm-8">@loan.LoanTotalAmountToPayLate.ToString("C")</dd>
+
+                                        <dt class="col-sm-4">Capital total pagado</dt>
+                                        <dd class="col-sm-8">@loan.LoanTotalPaidCapital.ToString("C")</dd>
+
+                                        <dt class="col-sm-4">Fecha del último pago</dt>
+                                        <dd class="col-sm-8">@loan.LoanFinalPaymentDate?.ToString("dd/MM/yyyy")</dd>
+
+                                        <dt class="col-sm-4">Fecha del primer pago</dt>
+                                        <dd class="col-sm-8">
+                                            @if (loan.LoanFirstPaymentDate.HasValue)
+                                            {
+                                                @loan.LoanFirstPaymentDate.Value.ToString("dd/MM/yyyy")
+                                            }
+                                            else
+                                            {
+                                                <text>Pagará en la ultima exhibición</text>
+                                            }
+                                        </dd>
+                                    </dl>
+                                    </div>
+                                    <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+                }
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#loansTable').DataTable({
+                "responsive": true,
+                "paging": true, // Habilitar paginación
+                "searching": true, // Habilitar búsqueda
+                "ordering": true, // Habilitar ordenamiento
+                "info": true, // Mostrar información
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" // Español
+                }
+            });
+        });
+    </script>
+}

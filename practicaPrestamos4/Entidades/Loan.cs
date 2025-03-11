@@ -32,7 +32,6 @@ namespace practicaPrestamos4.Entidades
         [Required]
         [Column(TypeName = "decimal(18, 2)")]
         [Display(Name = "Interés Aprobado")]
-
         public decimal LoanApprovedInterest { get; set; }  // LoanApprovedInterest (decimal(18, 2))
 
         [Required]
@@ -81,10 +80,15 @@ namespace practicaPrestamos4.Entidades
         public DateTime? UpdatedAt { get; set; } = DateTime.UtcNow;  // UpdatedAt (datetime, DEFAULT GETUTCDATE() ON UPDATE CURRENT_TIMESTAMP)
 
         // Relaciones
-        public Employee Employee { get; set; }  // Relación con Employee
+        public Employee? Employee { get; set; }  // Relación con Employee
 
-        public PaymentType PaymentTypes { get; set; }  // Relación con PaymentTypes
+        public PaymentType? PaymentTypes { get; set; }  // Relación con PaymentTypes
 
-        public User User { get; set; }  // Relación con User (Autor)
+        public User? User { get; set; }  // Relación con User (Autor)
+
+
+        // Propiedad de navegación para el historial
+        public ICollection<LoanHistory> LoanHistories { get; set; } = new List<LoanHistory>();
+
     }
 }
