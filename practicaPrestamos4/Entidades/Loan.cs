@@ -71,9 +71,9 @@ namespace practicaPrestamos4.Entidades
         [Display(Name = "Notas")]
         public string? LoanNotes { get; set; }  // LoanNotes (nvarchar(max), nullable)
 
-        //[Required]
-        //[Display(Name = "Estatus")]
-        //public byte LoanStatus { get; set; } = 1;  // Employee_status (tinyint, NOT NULL, DEFAULT 1 = activo, 2 = pagado)
+        [Required]
+        [Display(Name = "Estatus")]
+        public byte LoanStatus { get; set; } = 1;  // Employee_status (tinyint, NOT NULL, DEFAULT 1 = activo, 2 = pagado)
 
 
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

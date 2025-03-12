@@ -34,6 +34,11 @@ namespace practicaPrestamos4.Entidades
         [MaxLength(500)]
         public string? NewValue { get; set; }
 
+        [Required]
+        [Display(Name = "Estatus")]
+        public byte LoanHistoryStatus { get; set; } = 1;  // Employee_status (tinyint, NOT NULL, DEFAULT 1 = activo, 2 = pagado)
+
+
         // Estilo Laravel: CreatedAt y UpdatedAt
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }

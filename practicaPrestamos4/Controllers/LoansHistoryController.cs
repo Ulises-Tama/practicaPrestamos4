@@ -18,6 +18,7 @@ public class LoansHistoryController : Controller
     public async Task<IActionResult> Index()
     {
         var loansHistory = await _context.LoanHistories
+            .Where(lh => lh.LoanHistoryStatus != 2)
             .Include(lh => lh.Loan) // Incluir la relación con Loan
             .ThenInclude(l => l.Employee) // Incluir la relación con Employee desde Loan
             .Select(lh => new LoanHistoryViewModel

@@ -23,10 +23,11 @@ namespace practicaPrestamos4.Controllers
         {
             // Obtener la lista de préstamos desde la base de datos
             var loans = await _context.Loans
-                .Include(l => l.Employee) // Incluir la relación con Employee
-                .Include(l => l.PaymentTypes) // Incluir la relación con PaymentTypes
-                .Include(l => l.User) // Incluir la relación con User
-                .ToListAsync();
+                .Where(l => l.LoanStatus != 2) // Filtro antes de los Include
+                .Include(l => l.Employee)      // Incluir la relación con Employee
+                .Include(l => l.PaymentTypes)  // Incluir la relación con PaymentTypes
+                .Include(l => l.User)          // Incluir la relación con User
+                .ToListAsync();                // Ejecutar la consulta y obtener los resultados
 
             return View(loans); // Pasar la lista de préstamos a la vista
         }
@@ -141,7 +142,7 @@ namespace practicaPrestamos4.Controllers
                 }
 
                 // Si no es AJAX, redirigir a la vista Index
-                return RedirectToAction("Index", "Loan");
+                return RedirectToAction("Index", "Loans");
             }
 
             // Si el modelo no es válido y no es AJAX, recargar la vista con los datos necesarios

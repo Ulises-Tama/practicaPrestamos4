@@ -56,55 +56,43 @@
                             }
                         </td>
                         <td>
-                            @if (employee.EmployeeStatus == 1)
-                            {
-                                <a asp-controller="Loans" asp-action="Create"
-                                   asp-route-employeeId="@employee.EmployeeId"
-                                   class="btn btn-success btn-sm">
-                                    <i class="fas fa-plus"></i> Nuevo préstamo
-                                </a>
-                            }
-                            else if (employee.EmployeeStatus == 2)
-                            {
-                                @* <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" *@
-                                @*         data-bs-target="#abonarModal-@employee.EmployeeId" *@
-                                @*         data-loanid="@employee.Loans.FirstOrDefault()?.LoanId"> *@
-                                @*     Abonar *@
-                                @* </button> *@
+                            <a asp-controller="Loans" asp-action="Create"
+                                asp-route-employeeId="@employee.EmployeeId"
+                                class="btn btn-success btn-sm">
+                                <i class="fas fa-plus"></i> Nuevo préstamo
+                            </a> 
+                            |
+                            <!-- Button trigger modal -->
+                            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#fireEmployee-@employee.PayrollNumber">
+                                Dar de baja
+                            </button>
 
-                                @* <div class="modal fade" id="abonarModal-@employee.EmployeeId" tabindex="-1"  *@
-                                @*     aria-labelledby="abonarModalLabel" aria-hidden="true"> *@
-                                @*     <div class="modal-dialog modal-dialog-centered" role="document"> *@
-                                @*         <div class="modal-content"> *@
-                                @*             <div class="modal-header"> *@
-                                @*                 <h5 class="modal-title" id="abonarModalLabel">Abonar al Préstamo</h5> *@
-                                @*                 <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"> *@
-                                @*                     <span aria-hidden="true">&times;</span> *@
-                                @*                 </button> *@
-                                @*             </div> *@
-                                @*             <div class="modal-body"> *@
-                                @*                 <form asp-action="Pay" method="post"> *@
-                                @*                     <input type="hidden" name="loanId" id="loanId-@employee.EmployeeId" /> *@
-
-                                @*                     <div class="form-group"> *@
-                                @*                         <label for="amount">Cantidad a Abonar</label> *@
-                                @*                         <input type="number" class="form-control" id="amount" name="amount" step="0.01" min="0" required /> *@
-                                @*                     </div> *@
-
-                                @*                     <div class="modal-footer"> *@
-                                @*                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button> *@
-                                @*                         <button type="submit" class="btn btn-primary">Abonar</button> *@
-                                @*                     </div> *@
-                                @*                 </form> *@
-                                @*             </div> *@
-                                @*         </div> *@
-                                @*     </div> *@
-                                @* </div> *@
-                            }
-                            else
-                        {
-                            
-                        }
+                            <!-- Modal -->
+                            <div class="modal fade" id="fireEmployee-@employee.PayrollNumber" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="exampleModalLabel">Confirmar baja de empleado @employee.EmployeeName @employee.EmployeeLastname1 @employee.EmployeeLastname2</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form asp-action="DarDeBajaEmpleado" id="confirmDeleteForm">
+                                                <input type="hidden" name="employeeId" value="@employee.EmployeeId" />
+                                                <p style="font-size: 1.2em; font-weight: bold;">Esta acción es muy importante y no se debe tomar a la ligera.</p>
+                                                <div class="form-check">
+                                                    <input type="checkbox" class="form-check-input" id="confirmCheck-@employee.PayrollNumber">
+                                                    <label class="form-check-label" for="confirmCheck-@employee.PayrollNumber">Estoy seguro de dar de baja al empleado</label>
+                                                </div>
+                                                <hr>
+                                                <input type="submit" name="name" value="Dar de baja" class="btn btn-outline-danger" />
+                                            </form>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </td>
                     </tr>
                 }
@@ -113,6 +101,7 @@
 
     </div>
 </div>
+
 
 @section Scripts {
     <script>
@@ -124,6 +113,16 @@
                 "info": true, // Mostrar información
                 "language": {
                     "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" // Español
+                },
+                "columnDefs": [
+                    { "type": "num", "targets": 0 } // La columna de números de préstamo
+                ]
+            });
+            $('#confirmCheck').change(function(){
+                if($(this).is(':checked')){
+                    $('#confirmDeleteButton').prop('disabled', false);
+                } else {
+                    $('#confirmDeleteButton').prop('disabled', true);
                 }
             });
         });
