@@ -1,0 +1,135 @@
+﻿@model IEnumerable<practicaPrestamos4.Entidades.Loan>
+
+@{
+    ViewData["Title"] = "Préstamos terminados";
+}
+
+<div class="card shadow-lg mb-5 bg-body rounded">
+    <div class="card-header">
+        Préstamos terminados
+    </div>
+    <div class="card-body">
+        <div class="d-flex justify-content-start">
+            <a asp-action="Index" class="btn btn-primary float-end">Prestamos actuales</a>
+        </div>
+        <br />
+        <br />
+        <table id="loansTable" class="table table-striped dt-responsive nowrap table-bordered" style="width:100%">
+            <thead>
+                <tr>
+                    <th># de prestamo</th>
+                    <th>Empleado</th>
+                    <th>Adeudo</th>
+                    <th>Total pagado</th>
+                    <th>Restante</th>
+                    <th>Periodo de pago</th>
+                    <th>Aprobador</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var loan in Model)
+                {
+                    <tr>
+                        <td>@loan.LoanId</td>
+                        <td>@loan.Employee?.EmployeeName @loan.Employee?.EmployeeLastname1 @loan.Employee?.EmployeeLastname2</td>
+                        <td>@loan.LoanTotalAmountToPay.ToString("C")</td>
+                        <td>@loan.LoanTotalPaidCapital.ToString("C")</td>
+                        <td>$@(loan.LoanTotalAmountToPay - loan.LoanTotalPaidCapital)</td>
+                        <td>@loan.PaymentTypes?.ShortName</td>
+                        <td>@loan.User?.Name</td>
+                        <td>
+                            <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#detailsModal-@loan.LoanId">
+                                Info
+                            </button>
+
+                        </td>
+                    </tr>
+                    
+                    @* modal de deltalles *@
+                    <div class="modal fade" id="detailsModal-@loan.LoanId" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header bet">
+                                    <h5 class="modal-title" id="detailsModalLabel">Detalles del préstamo</h5>
+                                    <button type="button" class="close align-self-end align-content-end align-items-md-end" data-bs-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body align-middle">
+                                    <dl class="row align-middle">
+                                        <dt class="col-sm-5 border">Monto solicitado</dt>
+                                        <dd class="col-sm-7 border">@loan.LoanAmount.ToString("c")</dd>
+
+                                        <dt class="col-sm-5 border">Interés aprobado</dt>
+                                        <dd class="col-sm-7 border">@loan.LoanApprovedInterest.ToString("N2") %</dd>
+
+                                        <dt class="col-sm-5 border">Interés moratorio</dt>
+                                        <dd class="col-sm-7 border">@loan.LoanLateInterest.ToString("N2") %</dd>
+
+                                        <dt class="col-sm-5 border">Monto total a pagar</dt>
+                                        <dd class="col-sm-7 border">@loan.LoanTotalAmountToPay.ToString("C")</dd>
+
+                                        <dt class="col-sm-5 border">Monto total a tagar (moratorio)</dt>
+                                        <dd class="col-sm-7 border">@loan.LoanTotalAmountToPayLate.ToString("C")</dd>
+
+                                        <dt class="col-sm-5 border">Capital total pagado</dt>
+                                        <dd class="col-sm-7 border">@loan.LoanTotalPaidCapital.ToString("C")</dd>
+
+                                        <dt class="col-sm-5 border">Notas</dt>
+                                        <dd class="col-sm-7 border">@loan.LoanNotes</dd>
+
+                                        <dt class="col-sm-5 border">Fecha del último pago</dt>
+                                        <dd class="col-sm-7 border">@loan.LoanFinalPaymentDate?.ToString("dd/MM/yyyy")</dd>
+
+                                        <dt class="col-sm-5 border">Fecha del primer pago</dt>
+                                        <dd class="col-sm-7 border">
+                                            @if (loan.LoanFirstPaymentDate.HasValue)
+                                            {
+                                                @loan.LoanFirstPaymentDate.Value.ToString("dd/MM/yyyy")
+                                            }
+                                            else
+                                            {
+                                                <text>Pagará en la ultima exhibición</text>
+                                            }
+                                        </dd>
+
+                                        <dt class="col-sm-5 border">Fecha de creación</dt>
+                                        <dd class="col-sm-7 border">@loan.CreatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
+                                    </dl>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#employeeSelect').select2();
+            $('#loansTable').DataTable({
+                "responsive": true,
+                "paging": true, // Habilitar paginación
+                "searching": true, // Habilitar búsqueda
+                "ordering": true, // Habilitar ordenamiento
+                "info": true, // Mostrar información
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" // Español
+                },
+                "columnDefs": [
+                    { "type": "num", "targets": 0 } // La columna de números de préstamo
+                ]
+            });
+        });
+    </script>
+
+
+}

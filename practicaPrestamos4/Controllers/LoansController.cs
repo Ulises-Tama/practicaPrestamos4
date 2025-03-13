@@ -289,5 +289,18 @@ namespace practicaPrestamos4.Controllers
             return Json(new { employees });
         }
 
+        public async Task<IActionResult> OldLoans()
+        {
+            // Obtener la lista de préstamos desde la base de datos
+            var loans = await _context.Loans
+                .Where(l => l.LoanStatus == 2) 
+                .Include(l => l.Employee)      
+                .Include(l => l.PaymentTypes)  
+                .Include(l => l.User)          
+                .ToListAsync();                
+
+            return View(loans); 
+        }
+
     }
 }

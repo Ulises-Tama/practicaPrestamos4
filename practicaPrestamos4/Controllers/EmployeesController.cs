@@ -153,5 +153,9 @@ namespace practicaPrestamos4.Controllers
             Console.WriteLine($"El ID del usuario no es un número válido: {userIdString}");
             return 0; // Si el ID no es un número válido
         }
+
+
+
+
     }
 }
