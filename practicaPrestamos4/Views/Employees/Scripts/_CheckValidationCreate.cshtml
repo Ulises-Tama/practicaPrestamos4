@@ -1,0 +1,14 @@
+﻿<script>
+    document.querySelector('form').addEventListener('submit', function (event) {
+        const checkbox = document.getElementById('confirmData');
+        const errorMessage = document.getElementById('confirmDataError');
+
+        if (!checkbox.checked) {
+            errorMessage.style.display = 'block';
+            event.preventDefault(); // Evita que el formulario se envíe
+        } else {
+            errorMessage.style.display = 'none';
+        }
+    });
+    
+</script>

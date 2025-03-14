@@ -1,0 +1,45 @@
+﻿<!-- Views/Loans/Modals/_AbonosModalIndex.cshtml -->
+@model practicaPrestamos4.Entidades.Loan
+
+<div class="modal fade" id="debtPayment-@Model.LoanId" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header bet">
+                <h5 class="modal-title" id="detailsModalLabel">Abonar al préstamo</h5>
+                <button type="button" class="close align-self-end align-content-end align-items-md-end" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="Pay" method="post">
+                    <input type="hidden" name="LoanId" value="@Model.LoanId" />
+
+                    <div class="form-group">
+                        <label for="amount">Cantidad a abonar</label>
+                        <input type="number" class="form-control" id="amount" name="amount" step="0.01" min="0" max="@(Model.LoanTotalAmountToPay - Model.LoanTotalPaidCapital)" required />
+                        <small class="form-text text-muted">
+                            Saldo pendiente: @((Model.LoanTotalAmountToPay - Model.LoanTotalPaidCapital).ToString("C"))
+                        </small>
+                    </div>
+
+                    <div class="modal-footer">
+                        <div class="form-group form-check">
+                            <input type="checkbox" class="form-check-input" id="confirmData@Model.LoanId" name="confirmData" required />
+                            <label class="form-check-label" for="confirmData@Model.LoanId">
+                                Por favor, confirma que los datos son correctos antes de continuar.
+                            </label>
+                            <span class="text-danger" id="confirmDataError" style="display: none;">Debes confirmar que los datos son correctos.</span>
+                        </div>
+                        <br />
+                        <br />
+                        <br />
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
+
+                        <button type="submit" class="btn btn-primary">Abonar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+

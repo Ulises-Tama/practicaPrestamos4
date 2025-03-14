@@ -1,0 +1,44 @@
+﻿<!-- Views/Loans/Scripts/_NewLoanModalIndex.cshtml -->
+
+
+<script>
+    $('#newLoanModal').on('show.bs.modal', function () {
+        $.ajax({
+            url: '@Url.Action("GetEmployeesAndPaymentTypes", "Loans")',
+            type: 'GET',
+            success: function (data) {
+                console.log(data);
+                // Llenar el select de empleados
+                var employeeSelect = $('#employeeSelect');
+                employeeSelect.empty();
+                employeeSelect.append('<option value="">Seleccione un empleado...</option>');
+                $.each(data.employees, function (index, employee) {
+                    employeeSelect.append(`<option value="${employee.employeeId}">${employee.fullName}</option>`);
+                });
+
+                // Inicializar Select2 después de llenar el select
+                employeeSelect.select2({
+                    placeholder: "Buscar empleado...",
+                    allowClear: true // Permite limpiar la selección
+                });
+
+                // Llenar el select de tipos de pago
+                var paymentTypeSelect = $('#paymentTypeSelect');
+                paymentTypeSelect.empty();
+                paymentTypeSelect.append('<option value="">Seleccione un tipo de pago...</option>');
+                $.each(data.paymentTypes, function (index, paymentType) {
+                    paymentTypeSelect.append(`<option value="${paymentType.paymentTypeId}">${paymentType.shortName} (${paymentType.description})</option>`);
+                });
+
+                // Inicializar Select2 para el select de tipos de pago (si lo deseas)
+                paymentTypeSelect.select2({
+                    placeholder: "Seleccione un tipo de pago...",
+                    allowClear: true
+                });
+            },
+            error: function () {
+                alert('Error al cargar los datos.');
+            }
+        });
+    });
+</script>

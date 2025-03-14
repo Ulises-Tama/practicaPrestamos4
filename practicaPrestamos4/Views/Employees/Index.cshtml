@@ -62,37 +62,11 @@
                                 <i class="fas fa-plus"></i> Nuevo préstamo
                             </a> 
                             |
-                            <!-- Button trigger modal -->
                             <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#fireEmployee-@employee.PayrollNumber">
                                 Dar de baja
                             </button>
-
-                            <!-- Modal -->
-                            <div class="modal fade" id="fireEmployee-@employee.PayrollNumber" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                <div class="modal-dialog modal-lg">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="exampleModalLabel">Confirmar baja de empleado @employee.EmployeeName @employee.EmployeeLastname1 @employee.EmployeeLastname2</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <form asp-action="DarDeBajaEmpleado" id="confirmDeleteForm">
-                                                <input type="hidden" name="employeeId" value="@employee.EmployeeId" />
-                                                <p style="font-size: 1.2em; font-weight: bold;">Esta acción es muy importante y no se debe tomar a la ligera.</p>
-                                                <div class="form-check">
-                                                    <input type="checkbox" class="form-check-input" id="confirmCheck-@employee.PayrollNumber">
-                                                    <label class="form-check-label" for="confirmCheck-@employee.PayrollNumber">Estoy seguro de dar de baja al empleado</label>
-                                                </div>
-                                                <hr>
-                                                <input type="submit" name="name" value="Dar de baja" class="btn btn-outline-danger" />
-                                            </form>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            @* modal de abonos *@
+                            @await Html.PartialAsync("Modals/_FireEmployeeIndex", employee)
                         </td>
                     </tr>
                 }
@@ -104,51 +78,7 @@
 
 
 @section Scripts {
-    <script>
-        $(document).ready(function () {
-            $('#employeesTable').DataTable({
-                "paging": true, // Habilitar paginación
-                "searching": true, // Habilitar búsqueda
-                "ordering": true, // Habilitar ordenamiento
-                "info": true, // Mostrar información
-                "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" // Español
-                },
-                "columnDefs": [
-                    { "type": "num", "targets": 0 } // La columna de números de préstamo
-                ]
-            });
-            $('#confirmCheck').change(function(){
-                if($(this).is(':checked')){
-                    $('#confirmDeleteButton').prop('disabled', false);
-                } else {
-                    $('#confirmDeleteButton').prop('disabled', true);
-                }
-            });
-        });
-    </script>
 
-    <script>
-        $(document).ready(function () {
-            // Usar el selector correcto para Bootstrap 5
-            $('button[data-bs-target^="#abonarModal"]').on('click', function () {
-                console.log("Entró a la función");
-
-                // Obtener el LoanId del botón
-                var loanId = $(this).data('loanid');
-                console.log("LoanId:", loanId);
-
-                var loanBalance = $(this).data('loanBalance');
-                console.log("LoanBalance:", loanBalance);
-
-                // Obtener el EmployeeId del botón
-                var employeeId = $(this).data('bs-target').replace('#abonarModal-', '');
-                console.log("EmployeeId:", employeeId);
-
-                // Asignar el LoanId al campo oculto del modal correspondiente
-                $('#loanId-' + employeeId).val(loanId);
-            });
-        });
-    </script>
+        @await Html.PartialAsync("Scripts/_DocumentReadyIndex");
 
 }

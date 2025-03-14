@@ -1,0 +1,29 @@
+﻿<!-- Views/Employees/Modals/FireEmployeeIndex.cshtml -->
+@model practicaPrestamos4.Entidades.Employee
+
+
+<div class="modal fade" id="fireEmployee-@Model.PayrollNumber" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Confirmar baja de empleado @Model.EmployeeName @Model.EmployeeLastname1 @Model.EmployeeLastname2</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="DarDeBajaEmpleado" id="confirmDeleteForm">
+                    <input type="hidden" name="employeeId" value="@Model.EmployeeId" />
+                    <p style="font-size: 1.2em; font-weight: bold;">Esta acción es muy importante y no se debe tomar a la ligera.</p>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="confirmCheck-@Model.PayrollNumber">
+                        <label class="form-check-label" for="confirmCheck-@Model.PayrollNumber">Estoy seguro de dar de baja al empleado</label>
+                    </div>
+                    <hr>
+                    <input type="submit" name="name" value="Dar de baja" class="btn btn-outline-danger" />
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

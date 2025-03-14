@@ -1,0 +1,87 @@
+﻿<!-- Views/Loans/Modals/_NuevoPrestamoModalIndex.cshtml -->
+
+<div class="modal fade" id="newLoanModal" tabindex="-1" aria-labelledby="newLoanModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="newLoanModalLabel">Registrar Nuevo Préstamo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="newLoanForm" method="post">
+                    <div class="row">
+                        <!-- Empleado -->
+                        <div class="form-group col-6">
+                            <label for="employeeSelect">Empleado</label>
+                            <br />
+                            <select class="form-control col-6" id="employeeSelect" name="LoanEmployeeId" required>
+                                <option value="">Seleccione un empleado...</option>
+                            </select>
+                        </div>
+
+                        <!-- Monto del Préstamo -->
+                        <div class="form-group col-6">
+                            <label for="loanAmount">Monto del Préstamo</label>
+                            <input type="number" class="form-control" id="loanAmount" name="LoanAmount" step="0.01" required />
+                        </div>
+
+                        <!-- Tipo de Pago -->
+                        <div class="form-group col-6">
+                            <label for="paymentTypeSelect">Tipo de Pago</label>
+                            <br />
+                            <select class="form-control col-12" id="paymentTypeSelect" name="LoanPaymentTypeId" required>
+                                <option value="">Seleccione un tipo de pago...</option>
+                            </select>
+                        </div>
+
+                        <!-- Fecha del Primer Pago -->
+                        <div class="form-group col-6" id="firstPaymentDateGroup">
+                            <label for="firstPaymentDate">Fecha del Primer Pago</label>
+                            <input type="date" class="form-control" id="firstPaymentDate" name="LoanFirstPaymentDate" />
+                        </div>
+
+                        <!-- Fecha del Último Pago -->
+                        <div class="form-group col-6">
+                            <label for="finalPaymentDate">Fecha del Último Pago</label>
+                            <input type="date" class="form-control" id="finalPaymentDate" name="LoanFinalPaymentDate" />
+                        </div>
+
+                        <!-- Intereses Aprobados -->
+                        <div class="form-group col-6">
+                            <label for="approvedInterest">Interés Aprobado (%)</label>
+                            <input type="number" class="form-control" id="approvedInterest" name="LoanApprovedInterest" required />
+                        </div>
+
+                        <!-- Intereses Moratorios -->
+                        <div class="form-group col-6">
+                            <label for="lateInterest">Interés Moratorio (%)</label>
+                            <input type="number" class="form-control" id="lateInterest" name="LoanLateInterest" required />
+                        </div>
+
+                        <!-- Cantidad Total a Pagar (Calculada) -->
+                        <div class="form-group col-6">
+                            <label for="totalAmountToPay">Cantidad Total a Pagar</label>
+                            <input type="text" class="form-control" id="totalAmountToPay" readonly />
+                        </div>
+
+                        <!-- Cantidad Total a Pagar (Moratorio) -->
+                        <div class="form-group col-6">
+                            <label for="totalAmountToPayLate">Cantidad Total a Pagar (Moratorio)</label>
+                            <input type="text" class="form-control" id="totalAmountToPayLate" readonly />
+                        </div>
+
+                        <!-- Notas -->
+                        <div class="form-group">
+                            <label for="loanNotes">Notas</label>
+                            <textarea class="form-control" id="loanNotes" name="LoanNotes" rows="3"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="saveLoanButton">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>

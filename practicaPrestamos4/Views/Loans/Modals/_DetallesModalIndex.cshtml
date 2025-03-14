@@ -1,0 +1,62 @@
+﻿<!-- Views/Loans/Modals/_DetallesModalIndex.cshtml -->
+@model practicaPrestamos4.Entidades.Loan
+
+
+
+<div class="modal fade" id="detailsModal-@Model.LoanId" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bet">
+                <h5 class="modal-title" id="detailsModalLabel">Detalles del préstamo</h5>
+                <button type="button" class="close align-self-end align-content-end align-items-md-end" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body align-middle">
+                <dl class="row align-middle">
+                    <dt class="col-sm-5 border">Monto solicitado</dt>
+                    <dd class="col-sm-7 border">@Model.LoanAmount.ToString("c")</dd>
+
+                    <dt class="col-sm-5 border">Interés aprobado</dt>
+                    <dd class="col-sm-7 border">@Model.LoanApprovedInterest.ToString("N2") %</dd>
+
+                    <dt class="col-sm-5 border">Interés moratorio</dt>
+                    <dd class="col-sm-7 border">@Model.LoanLateInterest.ToString("N2") %</dd>
+
+                    <dt class="col-sm-5 border">Monto total a pagar</dt>
+                    <dd class="col-sm-7 border">@Model.LoanTotalAmountToPay.ToString("C")</dd>
+
+                    <dt class="col-sm-5 border">Monto total a tagar (moratorio)</dt>
+                    <dd class="col-sm-7 border">@Model.LoanTotalAmountToPayLate.ToString("C")</dd>
+
+                    <dt class="col-sm-5 border">Capital total pagado</dt>
+                    <dd class="col-sm-7 border">@Model.LoanTotalPaidCapital.ToString("C")</dd>
+
+                    <dt class="col-sm-5 border">Notas</dt>
+                    <dd class="col-sm-7 border">@Model.LoanNotes</dd>
+
+                    <dt class="col-sm-5 border">Fecha del último pago</dt>
+                    <dd class="col-sm-7 border">@Model.LoanFinalPaymentDate?.ToString("dd/MM/yyyy")</dd>
+
+                    <dt class="col-sm-5 border">Fecha del primer pago</dt>
+                    <dd class="col-sm-7 border">
+                        @if (Model.LoanFirstPaymentDate.HasValue)
+                        {
+                            @Model.LoanFirstPaymentDate.Value.ToString("dd/MM/yyyy")
+                        }
+                        else
+                        {
+                            <text>Pagará en la ultima exhibición</text>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-5 border">Fecha de creación</dt>
+                    <dd class="col-sm-7 border">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
+                </dl>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>

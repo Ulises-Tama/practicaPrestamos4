@@ -255,6 +255,7 @@ namespace practicaPrestamos4.Controllers
         public async Task<IActionResult> GetEmployeesAndPaymentTypes()
         {
             var employees = await _context.Employees
+                .Where(e => e.EmployeeStatus != 3)
                 .Select(e => new
                 {
                     e.EmployeeId,

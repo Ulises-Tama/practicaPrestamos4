@@ -1,0 +1,167 @@
+﻿<!-- Views/Loans/Scripts/_NewLoanModalIndex.cshtml -->
+
+
+@* ajax para llenar los campos del empleado y tipos de pago *@
+<script>
+    $(document).ready(function () {
+        // Cuando el modal se abre, hacer la llamada AJAX
+        $('#newLoanModal').on('show.bs.modal', function () {
+            $.ajax({
+                url: '@Url.Action("GetEmployeesAndPaymentTypes", "Loans")',
+                type: 'GET',
+                success: function (data) {
+                    // Llenar el select de empleados
+                    var employeeSelect = $('#employeeSelect');
+                    employeeSelect.empty();
+                    employeeSelect.append('<option value="">Seleccione un empleado...</option>');
+                    $.each(data.employees, function (index, employee) {
+                        employeeSelect.append(`<option value="${employee.employeeId}">${employee.fullName}</option>`);
+                    });
+                    employeeSelect.select2({
+                        dropdownParent: $('#newLoanModal') // Esto permite que el modal lo controle
+                    });
+                    // Llenar el select de tipos de pago
+                    var paymentTypeSelect = $('#paymentTypeSelect');
+                    paymentTypeSelect.empty();
+                    paymentTypeSelect.append('<option value="">Seleccione un tipo de pago...</option>');
+                    $.each(data.paymentTypes, function (index, paymentType) {
+                        paymentTypeSelect.append(`<option value="${paymentType.paymentTypeId}">${paymentType.shortName} (${paymentType.description})</option>`);
+                    });
+                    paymentTypeSelect.select2({
+                        dropdownParent: $('#newLoanModal')
+                    });
+                },
+                error: function () {
+                    alert('Error al cargar los datos.');
+                }
+            });
+        });
+
+        // Guardar el préstamo
+        $('#saveLoanButton').click(function () {
+            var formData = $('#newLoanForm').serialize();
+            $.ajax({
+                url: '@Url.Action("Create", "Loans")',
+                type: 'POST',
+                data: formData,
+                success: function (response) {
+                    if (response.success) {
+                        $('#newLoanModal').modal('hide');
+                        location.reload(); // Recargar la página para ver el nuevo préstamo
+                    } else {
+                        alert('Errores: ' + response.errors.join(', '));
+                    }
+                },
+                error: function () {
+                    alert('Error al guardar el préstamo.');
+                }
+            });
+        });
+
+        $('#newLoanModal').on('hidden.bs.modal', function () {
+            $('#employeeSelect').select2('destroy'); // Destruir Select2
+            $('#paymentTypeSelect').select2('destroy'); // Destruir Select2 (si lo usaste)
+        });
+
+        // Lógica de cálculo y validación
+        const loanAmountInput = $('#loanAmount');
+        const paymentTypeSelect = $('#paymentTypeSelect');
+        const firstPaymentDateGroup = $('#firstPaymentDateGroup');
+        const firstPaymentDateInput = $('#firstPaymentDate');
+        const finalPaymentDateInput = $('#finalPaymentDate');
+        const approvedInterestInput = $('#approvedInterest');
+        const lateInterestInput = $('#lateInterest');
+        const totalAmountToPayInput = $('#totalAmountToPay');
+        const totalAmountToPayLateInput = $('#totalAmountToPayLate');
+
+        // Ocultar/mostrar la fecha del primer pago según el tipo de pago
+        paymentTypeSelect.change(function () {
+            if (paymentTypeSelect.val() === '5') { // "Al Final"
+                firstPaymentDateGroup.hide();
+                firstPaymentDateInput.removeAttr('required');
+            } else {
+                firstPaymentDateGroup.show();
+                firstPaymentDateInput.attr('required', 'required');
+            }
+        });
+
+        // Calcular la cantidad total a pagar
+        function calculateTotalAmount() {
+            const loanAmount = parseFloat(loanAmountInput.val()) || 0;
+            const approvedInterest = parseFloat(approvedInterestInput.val()) || 0;
+            const lateInterest = parseFloat(lateInterestInput.val()) || 0;
+
+            // Calcular el monto total a pagar sin intereses moratorios
+            const totalAmount = loanAmount + (loanAmount * (approvedInterest / 100));
+
+            // Calcular el monto total a pagar con intereses moratorios
+            const totalAmountLate = totalAmount + (loanAmount * (lateInterest / 100));
+
+            // Mostrar los montos en los campos correspondientes
+            totalAmountToPayInput.val(totalAmount.toFixed(2));
+            totalAmountToPayLateInput.val(totalAmountLate.toFixed(2));
+        }
+
+        // Validar la fecha del último pago
+        finalPaymentDateInput.change(function () {
+            const firstPaymentDate = new Date(firstPaymentDateInput.val());
+            const finalPaymentDate = new Date(finalPaymentDateInput.val());
+
+            if (finalPaymentDate <= firstPaymentDate) {
+                alert('La fecha del último pago debe ser posterior a la fecha del primer pago.');
+                finalPaymentDateInput.val(''); // Limpiar el campo
+            }
+        });
+
+        // Escuchar cambios en los campos relevantes
+        loanAmountInput.on('input', calculateTotalAmount);
+        approvedInterestInput.on('input', calculateTotalAmount);
+        lateInterestInput.on('input', calculateTotalAmount);
+
+        // Calcular la cantidad total a pagar al cargar la página
+        calculateTotalAmount();
+    });
+</script>
+
+
+<script>
+    $('#newLoanModal').on('show.bs.modal', function () {
+        $.ajax({
+            url: '@Url.Action("GetEmployeesAndPaymentTypes", "Loans")',
+            type: 'GET',
+            success: function (data) {
+                console.log(data);
+                // Llenar el select de empleados
+                var employeeSelect = $('#employeeSelect');
+                employeeSelect.empty();
+                employeeSelect.append('<option value="">Seleccione un empleado...</option>');
+                $.each(data.employees, function (index, employee) {
+                    employeeSelect.append(`<option value="${employee.employeeId}">${employee.fullName}</option>`);
+                });
+
+                // Inicializar Select2 después de llenar el select
+                employeeSelect.select2({
+                    placeholder: "Buscar empleado...",
+                    allowClear: true // Permite limpiar la selección
+                });
+
+                // Llenar el select de tipos de pago
+                var paymentTypeSelect = $('#paymentTypeSelect');
+                paymentTypeSelect.empty();
+                paymentTypeSelect.append('<option value="">Seleccione un tipo de pago...</option>');
+                $.each(data.paymentTypes, function (index, paymentType) {
+                    paymentTypeSelect.append(`<option value="${paymentType.paymentTypeId}">${paymentType.shortName} (${paymentType.description})</option>`);
+                });
+
+                // Inicializar Select2 para el select de tipos de pago (si lo deseas)
+                paymentTypeSelect.select2({
+                    placeholder: "Seleccione un tipo de pago...",
+                    allowClear: true
+                });
+            },
+            error: function () {
+                alert('Error al cargar los datos.');
+            }
+        });
+    });
+</script>
