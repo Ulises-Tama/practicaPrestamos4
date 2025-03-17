@@ -1,14 +1,12 @@
-﻿<!-- Views/Loans/Modals/_DetallesModalIndex.cshtml -->
-@model practicaPrestamos4.Entidades.Loan
-
-
+﻿@using practicaPrestamos4.Entidades
+@model Loan // Ajusta el tipo de modelo según tu estructura
 
 <div class="modal fade" id="detailsModal-@Model.LoanId" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header bet">
                 <h5 class="modal-title" id="detailsModalLabel">Detalles del préstamo</h5>
-                <button type="button" class="close align-self-end align-content-end align-items-md-end" data-bs-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>

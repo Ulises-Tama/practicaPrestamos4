@@ -43,118 +43,25 @@
                         <td>@loan.PaymentTypes?.ShortName</td>
                         <td>@loan.User?.Name</td>
                         <td>
-
-                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" 
-                                data-bs-target="#debtPayment-@loan.LoanId">
+                            <!-- Botón para abrir el modal de abonos -->
+                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                    data-bs-target="#debtPayment-@loan.LoanId">
                                 Abonar
                             </button>
-                            @* modal de abonos *@
-                            @* @await Html.PartialAsync("Modals/_AbonosModalIndex", loan) *@
-                            <div class="modal fade" id="debtPayment-@loan.LoanId" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header bet">
-                                            <h5 class="modal-title" id="detailsModalLabel">Abonar al préstamo</h5>
-                                            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <form asp-action="Pay" method="post">
-                                                <input type="hidden" name="LoanId" value="@loan.LoanId" />
+                            <!-- Modal de abonos -->
+                            @await Html.PartialAsync("Modals/_AbonosModalIndex", loan)
 
-                                                <div class="form-group">
-                                                    <label for="amount-@loan.LoanId">Cantidad a abonar</label>
-                                                    <input type="number" class="form-control" id="amount-@loan.LoanId" name="amount" step="0.01" min="0" max="@(loan.LoanTotalAmountToPay - loan.LoanTotalPaidCapital)" required />
-                                                    <small class="form-text text-muted">
-                                                        Saldo pendiente: @((loan.LoanTotalAmountToPay - loan.LoanTotalPaidCapital).ToString("C"))
-                                                    </small>
-                                                </div>
-
-                                                <div class="modal-footer">
-                                                    <div class="form-group form-check col-12">
-                                                        <input type="checkbox" class="form-check-input" id="confirmData-@loan.LoanId" name="confirmData" required />
-                                                        <label class="form-check-label col-10" for="confirmData-@loan.LoanId">
-                                                            Confirma que los datos son correctos.
-                                                        </label>
-                                                        <span class="text-danger" id="confirmDataError-@loan.LoanId" style="display: none;">Debes confirmar que los datos son correctos.</span>
-                                                    </div>
-                                                    <br />
-                                                    <br />
-                                                    <br />
-                                                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
-                                                    <button type="submit" class="btn btn-primary">Abonar</button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            |
-                            <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#detailsModal-@loan.LoanId">
+                            <!-- Botón para abrir el modal de detalles -->
+                            <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal"
+                                    data-bs-target="#detailsModal-@loan.LoanId">
                                 Info
                             </button>
-                            @* modal de deltalles *@
-                            @* @await Html.PartialAsync("Modals/_DetallesModalIndex", loan) *@
-                            <div class="modal fade" id="detailsModal-@loan.LoanId" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header bet">
-                                            <h5 class="modal-title" id="detailsModalLabel">Detalles del préstamo</h5>
-                                            <button type="button" class="close align-self-end align-content-end align-items-md-end" data-bs-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </div>
-                                        <div class="modal-body align-middle">
-                                            <dl class="row align-middle">
-                                                <dt class="col-sm-5 border">Monto solicitado</dt>
-                                                <dd class="col-sm-7 border">@loan.LoanAmount.ToString("c")</dd>
+                            <!-- Modal de detalles -->
+                            @await Html.PartialAsync("Modals/_DetallesModalIndex", loan)
 
-                                                <dt class="col-sm-5 border">Interés aprobado</dt>
-                                                <dd class="col-sm-7 border">@loan.LoanApprovedInterest.ToString("N2") %</dd>
-
-                                                <dt class="col-sm-5 border">Interés moratorio</dt>
-                                                <dd class="col-sm-7 border">@loan.LoanLateInterest.ToString("N2") %</dd>
-
-                                                <dt class="col-sm-5 border">Monto total a pagar</dt>
-                                                <dd class="col-sm-7 border">@loan.LoanTotalAmountToPay.ToString("C")</dd>
-
-                                                <dt class="col-sm-5 border">Monto total a tagar (moratorio)</dt>
-                                                <dd class="col-sm-7 border">@loan.LoanTotalAmountToPayLate.ToString("C")</dd>
-
-                                                <dt class="col-sm-5 border">Capital total pagado</dt>
-                                                <dd class="col-sm-7 border">@loan.LoanTotalPaidCapital.ToString("C")</dd>
-
-                                                <dt class="col-sm-5 border">Notas</dt>
-                                                <dd class="col-sm-7 border">@loan.LoanNotes</dd>
-
-                                                <dt class="col-sm-5 border">Fecha del último pago</dt>
-                                                <dd class="col-sm-7 border">@loan.LoanFinalPaymentDate?.ToString("dd/MM/yyyy")</dd>
-
-                                                <dt class="col-sm-5 border">Fecha del primer pago</dt>
-                                                <dd class="col-sm-7 border">
-                                                    @if (loan.LoanFirstPaymentDate.HasValue)
-                                                    {
-                                                        @loan.LoanFirstPaymentDate.Value.ToString("dd/MM/yyyy")
-                                                    }
-                                                    else
-                                                    {
-                                                        <text>Pagará en la ultima exhibición</text>
-                                                    }
-                                                </dd>
-
-                                                <dt class="col-sm-5 border">Fecha de creación</dt>
-                                                <dd class="col-sm-7 border">@loan.CreatedAt.ToString("dd/MM/yyyy HH:mm")</dd>
-                                            </dl>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            |
+                            <!-- Botón de editar -->
                             <a asp-action="Edit" asp-route-id="@loan.LoanId" class="btn btn-warning btn-sm">Editar</a>
+                        </td>
                     </tr>
                 }
             </tbody>
@@ -312,12 +219,12 @@
     </script>
 
     <script>
-                document.addEventListener('DOMContentLoaded', function () {
-            // Escuchar el evento "shown.bs.modal" para todos los modales
+        document.addEventListener('DOMContentLoaded', function () {
+            // Manejar el foco cuando un modal se abre
             document.querySelectorAll('.modal').forEach(function (modal) {
                 modal.addEventListener('shown.bs.modal', function () {
                     // Enfocar el primer campo de entrada dentro del modal
-                    const inputField = modal.querySelector('input[type="number"], input[type="text"], input[type="email"]');
+                    const inputField = modal.querySelector('input, textarea, select, button');
                     if (inputField) {
                         inputField.focus();
                     }
