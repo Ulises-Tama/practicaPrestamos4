@@ -1,0 +1,72 @@
+﻿@model practicaPrestamos4.Entidades.Loan
+
+<div class="modal fade" id="editLoanModal-@Model.LoanId" tabindex="-1" aria-labelledby="editLoanModalLabel-@Model.LoanId" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editLoanModalLabel-@Model.LoanId">Editar Préstamo @Model.LoanId</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="EditLoan" method="post">
+                    <input type="hidden" asp-for="LoanId" value="@Model.LoanId" />
+
+                    <!-- Campos editables -->
+                    <div class="form-group">
+                        <label asp-for="LoanAmount">Monto del Préstamo</label>
+                        <input asp-for="LoanAmount" class="form-control" value="@Model.LoanAmount" />
+                        <span asp-validation-for="LoanAmount" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="LoanApprovedInterest">Interés Aprobado (%)</label>
+                        <input asp-for="LoanApprovedInterest" class="form-control" value="@Model.LoanApprovedInterest" />
+                        <span asp-validation-for="LoanApprovedInterest" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="LoanLateInterest">Interés Moratorio (%)</label>
+                        <input asp-for="LoanLateInterest" class="form-control" value="@Model.LoanLateInterest" />
+                        <span asp-validation-for="LoanLateInterest" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="LoanPaymentTypeId">Tipo de Pago</label>
+                        <select asp-for="LoanPaymentTypeId" class="form-control">
+                            @foreach (var paymentType in ViewBag.PaymentTypes)
+                            {
+                                <option value="@paymentType.PaymentTypeId" selected="@(paymentType.PaymentTypeId == Model.LoanPaymentTypeId)">
+                                    @paymentType.ShortName
+                                </option>
+                            }
+                        </select>
+                        <span asp-validation-for="LoanPaymentTypeId" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="LoanFirstPaymentDate">Fecha del Primer Pago</label>
+                        <input asp-for="LoanFirstPaymentDate" class="form-control" type="date" value="@Model.LoanFirstPaymentDate?.ToString("yyyy-MM-dd")" />
+                        <span asp-validation-for="LoanFirstPaymentDate" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="LoanFinalPaymentDate">Fecha del Último Pago</label>
+                        <input asp-for="LoanFinalPaymentDate" class="form-control" type="date" value="@Model.LoanFinalPaymentDate?.ToString("yyyy-MM-dd")" />
+                        <span asp-validation-for="LoanFinalPaymentDate" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="LoanNotes">Notas</label>
+                        <textarea asp-for="LoanNotes" class="form-control">@Model.LoanNotes</textarea>
+                        <span asp-validation-for="LoanNotes" class="text-danger"></span>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

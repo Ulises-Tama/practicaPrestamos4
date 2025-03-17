@@ -36,14 +36,16 @@
                 {
                     <tr>
                         <td>@loan.LoanId</td>
-                    <td>@loan.Employee?.EmployeeName @loan.Employee?.EmployeeLastname1 @loan.Employee?.EmployeeLastname2</td>
-                    <td>@loan.LoanTotalAmountToPay.ToString("C")</td>
+                        <td>@loan.Employee?.EmployeeName @loan.Employee?.EmployeeLastname1 @loan.Employee?.EmployeeLastname2</td>
+                        <td>@loan.LoanTotalAmountToPay.ToString("C")</td>
                         <td>@loan.LoanTotalPaidCapital.ToString("C")</td>
-                    <td>$@(loan.LoanTotalAmountToPay - loan.LoanTotalPaidCapital)</td>
+                        <td>$@(loan.LoanTotalAmountToPay - loan.LoanTotalPaidCapital)</td>
                         <td>@loan.PaymentTypes?.ShortName</td>
                         <td>@loan.User?.Name</td>
                         <td>
-                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#debtPayment-@loan.LoanId">
+
+                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" 
+                                data-bs-target="#debtPayment-@loan.LoanId">
                                 Abonar
                             </button>
                             @* modal de abonos *@
@@ -53,7 +55,7 @@
                                     <div class="modal-content">
                                         <div class="modal-header bet">
                                             <h5 class="modal-title" id="detailsModalLabel">Abonar al préstamo</h5>
-                                            <button type="button" class="close align-self-end align-content-end align-items-md-end" data-bs-dismiss="modal" aria-label="Close">
+                                            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                                                 <span aria-hidden="true">&times;</span>
                                             </button>
                                         </div>
@@ -62,8 +64,8 @@
                                                 <input type="hidden" name="LoanId" value="@loan.LoanId" />
 
                                                 <div class="form-group">
-                                                    <label for="amount">Cantidad a abonar</label>
-                                                    <input type="number" class="form-control" id="amount" name="amount" step="0.01" min="0" max="@(loan.LoanTotalAmountToPay - loan.LoanTotalPaidCapital)" required />
+                                                    <label for="amount-@loan.LoanId">Cantidad a abonar</label>
+                                                    <input type="number" class="form-control" id="amount-@loan.LoanId" name="amount" step="0.01" min="0" max="@(loan.LoanTotalAmountToPay - loan.LoanTotalPaidCapital)" required />
                                                     <small class="form-text text-muted">
                                                         Saldo pendiente: @((loan.LoanTotalAmountToPay - loan.LoanTotalPaidCapital).ToString("C"))
                                                     </small>
@@ -75,13 +77,12 @@
                                                         <label class="form-check-label col-10" for="confirmData-@loan.LoanId">
                                                             Confirma que los datos son correctos.
                                                         </label>
-                                                        <span class="text-danger" id="confirmDataError" style="display: none;">Debes confirmar que los datos son correctos.</span>
+                                                        <span class="text-danger" id="confirmDataError-@loan.LoanId" style="display: none;">Debes confirmar que los datos son correctos.</span>
                                                     </div>
                                                     <br />
                                                     <br />
                                                     <br />
                                                     <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
-
                                                     <button type="submit" class="btn btn-primary">Abonar</button>
                                                 </div>
                                             </form>
@@ -152,7 +153,8 @@
                                     </div>
                                 </div>
                             </div>
-                        </td>
+                            |
+                            <a asp-action="Edit" asp-route-id="@loan.LoanId" class="btn btn-warning btn-sm">Editar</a>
                     </tr>
                 }
             </tbody>
@@ -161,29 +163,176 @@
     </div>
 </div>
 <!-- Modal para Nuevo Préstamo -->
-@await Html.PartialAsync("Modals/_NuevoPrestamoModalIndex")
+
+<div class="modal fade" id="newLoanModal" tabindex="-1" aria-labelledby="newLoanModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="newLoanModalLabel">Registrar Nuevo Préstamo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="newLoanForm" method="post">
+                    <div class="row">
+                        <!-- Select Empleado -->
+                        <div class="form-group col-6">
+                            <label for="employeeSelect">Empleado</label>
+                            <br />
+                            <select class="form-control col-6" id="employeeSelect2" name="LoanEmployeeId" required>
+                                <option value="">Seleccione un empleado...</option>
+                            </select>
+                        </div>
+
+                        <!-- Monto del Préstamo -->
+                        <div class="form-group col-6">
+                            <label for="loanAmount">Monto del Préstamo</label>
+                            <input type="number" class="form-control" id="loanAmount" name="LoanAmount" step="0.01" required />
+                        </div>
+
+                        <!-- Select Tipo de Pago -->
+                        <div class="form-group col-6">
+                            <label for="paymentTypeSelect">Tipo de Pago</label>
+                            <br />
+                            <select class="form-control col-12" id="paymentTypeSelect" name="LoanPaymentTypeId" required>
+                                <option value="">Seleccione un tipo de pago...</option>
+                            </select>
+                        </div>
+
+                        <!-- Fecha del Primer Pago -->
+                        <div class="form-group col-6" id="firstPaymentDateGroup">
+                            <label for="firstPaymentDate">Fecha del Primer Pago</label>
+                            <input type="date" class="form-control" id="firstPaymentDate" name="LoanFirstPaymentDate" />
+                        </div>
+
+                        <!-- Fecha del Último Pago -->
+                        <div class="form-group col-6">
+                            <label for="finalPaymentDate">Fecha del Último Pago</label>
+                            <input type="date" class="form-control" id="finalPaymentDate" name="LoanFinalPaymentDate" />
+                        </div>
+
+                        <!-- Intereses Aprobados -->
+                        <div class="form-group col-6">
+                            <label for="approvedInterest">Interés Aprobado (%)</label>
+                            <input type="number" class="form-control" id="approvedInterest" name="LoanApprovedInterest" required />
+                        </div>
+
+                        <!-- Intereses Moratorios -->
+                        <div class="form-group col-6">
+                            <label for="lateInterest">Interés Moratorio (%)</label>
+                            <input type="number" class="form-control" id="lateInterest" name="LoanLateInterest" required />
+                        </div>
+
+                        <!-- Cantidad Total a Pagar (Calculada) -->
+                        <div class="form-group col-6">
+                            <label for="totalAmountToPay">Cantidad Total a Pagar</label>
+                            <input type="text" class="form-control" id="totalAmountToPay" readonly />
+                        </div>
+
+                        <!-- Cantidad Total a Pagar (Moratorio) -->
+                        <div class="form-group col-6">
+                            <label for="totalAmountToPayLate">Cantidad Total a Pagar (Moratorio)</label>
+                            <input type="text" class="form-control" id="totalAmountToPayLate" readonly />
+                        </div>
+
+                        <!-- Notas -->
+                        <div class="form-group">
+                            <label for="loanNotes">Notas</label>
+                            <textarea class="form-control" id="loanNotes" name="LoanNotes" rows="3"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="saveLoanButton">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 @section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
     <script>
-        $(document).ready(function () {
-            $('#employeeSelect').select2();
-            $('#loansTable').DataTable({
-                "responsive": true,
-                "paging": true, // Habilitar paginación
-                "searching": true, // Habilitar búsqueda
-                "ordering": true, // Habilitar ordenamiento
-                "info": true, // Mostrar información
-                "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" // Español
+    $(document).ready(function () {
+        $('#employeeSelect').select2();
+        $('#loansTable').DataTable({
+            "responsive": true,
+            "paging": true, // Habilitar paginación
+            "searching": true, // Habilitar búsqueda
+            "ordering": true, // Habilitar ordenamiento
+            "info": true, // Mostrar información
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" // Español
+            },
+            "columnDefs": [
+                { "type": "num", "targets": 0 } // La columna de números de préstamo
+            ]
+        });
+        $('#newLoanModal').on('show.bs.modal', function () {
+            $.ajax({
+                url: '@Url.Action("GetEmployeesAndPaymentTypes", "Loans")',
+                type: 'GET',
+                success: function (data) {
+                    console.log(data);
+                    // Llenar el select de empleados
+                        var employeeSelect = $('#employeeSelect2');
+                    employeeSelect.empty();
+                    employeeSelect.append('<option value="">Seleccione un empleado...</option>');
+                    $.each(data.employees, function (index, employee) {
+                        employeeSelect.append(`<option value="${employee.employeeId}">${employee.fullName}</option>`);
+                    });
+
+                    // 🚀 🚀 🚀 **REINICIALIZAR SELECT2** (Esto lo arregla)
+                    employeeSelect.select2({
+                        dropdownParent: $('#newLoanModal') // Esto permite que el modal lo controle
+                    });
+
+                    // Llenar el select de tipos de pago
+                    var paymentTypeSelect = $('#paymentTypeSelect');
+                    paymentTypeSelect.empty();
+                    paymentTypeSelect.append('<option value="">Seleccione un tipo de pago...</option>');
+                    $.each(data.paymentTypes, function (index, paymentType) {
+                        paymentTypeSelect.append(`<option value="${paymentType.paymentTypeId}">${paymentType.shortName} (${paymentType.description})</option>`);
+                    });
+
+                    // 🚀 🚀 🚀 Reiniciar Select2 del tipo de pago también
+                    paymentTypeSelect.select2({
+                        dropdownParent: $('#newLoanModal')
+                    });
                 },
-                "columnDefs": [
-                    { "type": "num", "targets": 0 } // La columna de números de préstamo
-                ]
+                error: function () {
+                    alert('Error al cargar los datos.');
+                }
+            });
+        });
+    });
+    </script>
+
+    <script>
+                document.addEventListener('DOMContentLoaded', function () {
+            // Escuchar el evento "shown.bs.modal" para todos los modales
+            document.querySelectorAll('.modal').forEach(function (modal) {
+                modal.addEventListener('shown.bs.modal', function () {
+                    // Enfocar el primer campo de entrada dentro del modal
+                    const inputField = modal.querySelector('input[type="number"], input[type="text"], input[type="email"]');
+                    if (inputField) {
+                        inputField.focus();
+                    }
+                });
+
+                modal.addEventListener('hidden.bs.modal', function () {
+                    // Enfocar el botón que abrió el modal
+                    const triggerButton = document.querySelector('[data-bs-target="#' + modal.id + '"]');
+                    if (triggerButton) {
+                        triggerButton.focus();
+                    }
+                });
             });
         });
     </script>
-
-    @await Html.PartialAsync("Scripts/_NewLoanModalIndex")
+    
 
 }

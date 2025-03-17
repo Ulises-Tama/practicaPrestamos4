@@ -57,7 +57,7 @@ namespace practicaPrestamos4.Controllers
     [Bind("LoanId,LoanEmployeeId,LoanAmount,LoanTotalAmountToPay,LoanTotalAmountToPayLate,LoanApprovedInterest,LoanLateInterest,LoanPaymentTypeId,LoanFirstPaymentDate,LoanTotalPaidCapital,LoanTotalPaidInterest,LoanBalance,LoanFinalPaymentDate,LoanUserId,LoanNotes,CreatedAt,UpdatedAt")]
     Loan loan)
         {
-            Console.WriteLine("Checa modelo");
+            //Console.WriteLine("Checa modelo");
 
             if (loan == null)
             {
@@ -82,7 +82,7 @@ namespace practicaPrestamos4.Controllers
                     var state = ModelState[key];
                     if (state.Errors.Any())
                     {
-                        Console.WriteLine($"Error en {key}: {state.Errors.First().ErrorMessage}");
+                        //Console.WriteLine($"Error en {key}: {state.Errors.First().ErrorMessage}");
                     }
                 }
 
@@ -100,7 +100,7 @@ namespace practicaPrestamos4.Controllers
 
             if (ModelState.IsValid)
             {
-                Console.WriteLine("Entró al if");
+                //Console.WriteLine("Entró al if");
 
                 // Calcular los campos restantes
                 loan.LoanTotalPaidCapital = 0; // Inicialmente no se ha pagado nada
@@ -156,11 +156,11 @@ namespace practicaPrestamos4.Controllers
         {
             // Obtener el ID del usuario desde las claims
             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            Console.WriteLine($"Usuario ID desde claims: {userIdString}");
+            //Console.WriteLine($"Usuario ID desde claims: {userIdString}");
 
             if (string.IsNullOrEmpty(userIdString))
             {
-                Console.WriteLine("El usuario no está autenticado o no tiene un NameIdentifier.");
+                //Console.WriteLine("El usuario no está autenticado o no tiene un NameIdentifier.");
                 return 0; // Si no está autenticado o no tiene un ID válido
             }
 
@@ -170,14 +170,14 @@ namespace practicaPrestamos4.Controllers
                 var userExists = _context.Users.Any(u => u.Id == userId);
                 if (!userExists)
                 {
-                    Console.WriteLine($"El usuario con ID {userId} no existe en la base de datos.");
+                    //Console.WriteLine($"El usuario con ID {userId} no existe en la base de datos.");
                     return 0; // Si el usuario no existe
                 }
 
                 return userId;
             }
 
-            Console.WriteLine($"El ID del usuario no es un número válido: {userIdString}");
+            //Console.WriteLine($"El ID del usuario no es un número válido: {userIdString}");
             return 0; // Si el ID no es un número válido
         }
 
@@ -302,6 +302,198 @@ namespace practicaPrestamos4.Controllers
 
             return View(loans); 
         }
+
+        [HttpGet] // Asegúrate de que sea GET
+        public async Task<IActionResult> Edit(long? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            // Obtener el préstamo por su ID
+            var loan = await _context.Loans
+                .Include(l => l.Employee)
+                .Include(l => l.PaymentTypes)
+                .Include(l => l.User)
+                .FirstOrDefaultAsync(l => l.LoanId == id);
+
+            if (loan == null)
+            {
+                return NotFound();
+            }
+
+            // Cargar los tipos de pago en ViewBag
+            ViewBag.PaymentTypes = await _context.PaymentTypes.ToListAsync();
+
+            return View(loan);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditLoan([Bind("LoanId,LoanAmount,LoanApprovedInterest,LoanLateInterest,LoanPaymentTypeId,LoanFirstPaymentDate,LoanFinalPaymentDate,LoanNotes")] Loan loan)
+        {
+            Console.WriteLine($"LoanTotalAmountToPay: {loan.LoanTotalAmountToPay}");
+            Console.WriteLine($"LoanTotalAmountToPayLate: {loan.LoanTotalAmountToPayLate}");
+
+            if (ModelState.IsValid)
+            {
+                Console.WriteLine($"Entro al modelo");
+                try
+                {
+                    var existingLoan = await _context.Loans.FindAsync(loan.LoanId);
+                    if (existingLoan == null)
+                    {
+                        return NotFound();
+                    }
+
+                    int currentUserId = GetCurrentUserId();
+                    if (currentUserId == 0)
+                    {
+                        Console.WriteLine($"usuario: {currentUserId}");
+
+                        ModelState.AddModelError("", "Usuario no válido.");
+                        return RedirectToAction("Edit", new { id = loan.LoanId });
+                    }
+
+                    var changes = new List<string>();
+
+                    if (existingLoan.LoanAmount != loan.LoanAmount)
+                    {
+                        changes.Add($"LoanAmount: {existingLoan.LoanAmount} -> {loan.LoanAmount}");
+                        existingLoan.LoanAmount = loan.LoanAmount;
+
+                        // Recalcular LoanTotalAmountToPay y LoanBalance
+                        existingLoan.LoanTotalAmountToPay = loan.LoanAmount + (loan.LoanAmount * existingLoan.LoanApprovedInterest / 100);
+                        existingLoan.LoanBalance = existingLoan.LoanTotalAmountToPay - existingLoan.LoanTotalPaidCapital;
+                    }
+
+                    if (existingLoan.LoanApprovedInterest != loan.LoanApprovedInterest)
+                    {
+                        changes.Add($"LoanApprovedInterest: {existingLoan.LoanApprovedInterest} -> {loan.LoanApprovedInterest}");
+                        existingLoan.LoanApprovedInterest = loan.LoanApprovedInterest;
+
+                        // Recalcular LoanTotalAmountToPay y LoanBalance
+                        existingLoan.LoanTotalAmountToPay = existingLoan.LoanAmount + (existingLoan.LoanAmount * loan.LoanApprovedInterest / 100);
+                        existingLoan.LoanBalance = existingLoan.LoanTotalAmountToPay - existingLoan.LoanTotalPaidCapital;
+                    }
+
+                    if (existingLoan.LoanLateInterest != loan.LoanLateInterest)
+                    {
+                        changes.Add($"LoanLateInterest: {existingLoan.LoanLateInterest} -> {loan.LoanLateInterest}");
+                        existingLoan.LoanLateInterest = loan.LoanLateInterest;
+
+                        // Recalcular LoanTotalAmountToPayLate
+                        existingLoan.LoanTotalAmountToPayLate = existingLoan.LoanTotalAmountToPay + (existingLoan.LoanTotalAmountToPay * loan.LoanLateInterest / 100);
+                    }
+
+                    if (existingLoan.LoanPaymentTypeId != loan.LoanPaymentTypeId)
+                    {
+                        changes.Add($"LoanPaymentTypeId: {existingLoan.LoanPaymentTypeId} -> {loan.LoanPaymentTypeId}");
+                        existingLoan.LoanPaymentTypeId = loan.LoanPaymentTypeId;
+                    }
+
+                    if (existingLoan.LoanFirstPaymentDate != loan.LoanFirstPaymentDate)
+                    {
+                        changes.Add($"LoanFirstPaymentDate: {existingLoan.LoanFirstPaymentDate?.ToString("yyyy-MM-dd")} -> {loan.LoanFirstPaymentDate?.ToString("yyyy-MM-dd")}");
+                        existingLoan.LoanFirstPaymentDate = loan.LoanFirstPaymentDate;
+                    }
+
+                    if (existingLoan.LoanFinalPaymentDate != loan.LoanFinalPaymentDate)
+                    {
+                        changes.Add($"LoanFinalPaymentDate: {existingLoan.LoanFinalPaymentDate?.ToString("yyyy-MM-dd")} -> {loan.LoanFinalPaymentDate?.ToString("yyyy-MM-dd")}");
+                        existingLoan.LoanFinalPaymentDate = loan.LoanFinalPaymentDate;
+                    }
+
+                    if (existingLoan.LoanNotes != loan.LoanNotes)
+                    {
+                        changes.Add($"LoanNotes: {existingLoan.LoanNotes} -> {loan.LoanNotes}");
+                        existingLoan.LoanNotes = loan.LoanNotes;
+                    }
+
+                    // Actualizar LoanTotalPaidCapital y LoanTotalPaidInterest si es necesario
+                    if (existingLoan.LoanTotalPaidCapital != loan.LoanTotalPaidCapital)
+                    {
+                        changes.Add($"LoanTotalPaidCapital: {existingLoan.LoanTotalPaidCapital} -> {loan.LoanTotalPaidCapital}");
+                        existingLoan.LoanTotalPaidCapital = loan.LoanTotalPaidCapital;
+
+                        // Recalcular LoanBalance
+                        existingLoan.LoanBalance = existingLoan.LoanTotalAmountToPay - loan.LoanTotalPaidCapital;
+                    }
+
+                    if (existingLoan.LoanTotalPaidInterest != loan.LoanTotalPaidInterest)
+                    {
+                        changes.Add($"LoanTotalPaidInterest: {existingLoan.LoanTotalPaidInterest} -> {loan.LoanTotalPaidInterest}");
+                        existingLoan.LoanTotalPaidInterest = loan.LoanTotalPaidInterest;
+                    }
+
+                    //// Actualizar LoanUserId si es necesario
+                    //if (existingLoan.LoanUserId != loan.LoanUserId)
+                    //{
+                    //    changes.Add($"LoanUserId: {existingLoan.LoanUserId} -> {loan.LoanUserId}");
+                    //    existingLoan.LoanUserId = loan.LoanUserId;
+                    //}
+
+                    // Actualizar LoanStatus si es necesario
+                    if (existingLoan.LoanStatus != loan.LoanStatus)
+                    {
+                        changes.Add($"LoanStatus: {existingLoan.LoanStatus} -> {loan.LoanStatus}");
+                        existingLoan.LoanStatus = loan.LoanStatus;
+                    }
+
+                    // Actualizar UpdatedAt
+                    existingLoan.UpdatedAt = DateTime.UtcNow;
+
+                    // Si hay cambios, registrar en LoanHistory
+                    if (changes.Any())
+                    {
+                        var loanHistory = new LoanHistory
+                        {
+                            LoanId = existingLoan.LoanId,
+                            LoanHistoryUserId = currentUserId,
+                            FieldChanged = string.Join("; ", changes),
+                            OldValue = "Ver cambios en FieldChanged",
+                            NewValue = "Ver cambios en FieldChanged",
+                            CreatedAt = DateTime.UtcNow
+                        };
+
+                        _context.LoanHistories.Add(loanHistory);
+                    }
+
+                    existingLoan.UpdatedAt = DateTime.UtcNow;
+                    Console.WriteLine($"Prestamo actual: {existingLoan}");
+                    Console.WriteLine("Valores actuales del préstamo:");
+                    Console.WriteLine($"LoanAmount: {existingLoan.LoanAmount}");
+                    Console.WriteLine($"LoanTotalAmountToPay: {existingLoan.LoanTotalAmountToPay}");
+                    Console.WriteLine($"LoanTotalAmountToPayLate: {existingLoan.LoanTotalAmountToPayLate}");
+                    Console.WriteLine($"LoanApprovedInterest: {existingLoan.LoanApprovedInterest}");
+                    Console.WriteLine($"LoanPaymentTypeId: {existingLoan.LoanPaymentTypeId}");
+                    Console.WriteLine($"LoanFirstPaymentDate: {existingLoan.LoanFirstPaymentDate}");
+                    Console.WriteLine($"LoanTotalPaidCapital: {existingLoan.LoanTotalPaidCapital}");
+                    Console.WriteLine($"LoanTotalPaidInterest: {existingLoan.LoanTotalPaidInterest}");
+                    Console.WriteLine($"LoanBalance: {existingLoan.LoanBalance}");
+                    Console.WriteLine($"LoanFinalPaymentDate: {existingLoan.LoanFinalPaymentDate}");
+                    Console.WriteLine($"LoanUserId: {existingLoan.LoanUserId}");
+                    Console.WriteLine($"LoanStatus: {existingLoan.LoanStatus}");
+                    Console.WriteLine($"LoanNotes: {existingLoan.LoanNotes}");
+                    _context.Loans.Update(existingLoan);
+                    await _context.SaveChangesAsync();
+
+                    return RedirectToAction("Index");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error al guardar: {ex}");
+
+                    ModelState.AddModelError("", "Ocurrió un error al guardar los cambios.");
+                    return RedirectToAction("Edit", new { id = loan.LoanId });
+                }
+            }
+
+            Console.WriteLine($"Modelo invalido");
+            return RedirectToAction("Edit", new { id = loan.LoanId });
+        }
+
 
     }
 }

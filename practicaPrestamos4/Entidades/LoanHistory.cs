@@ -21,9 +21,8 @@ namespace practicaPrestamos4.Entidades
         public int LoanHistoryUserId { get; set; }
         public User User { get; set; }
 
-        // Campo que fue modificado
+        // Campo que fue modificado x2
         [Required]
-        [MaxLength(100)]
         public string FieldChanged { get; set; }
 
         // Valor antes del cambio

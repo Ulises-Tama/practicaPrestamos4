@@ -1,0 +1,106 @@
+﻿@using practicaPrestamos4.Entidades
+@model practicaPrestamos4.Entidades.Loan
+
+@{
+    ViewData["Title"] = "Editar préstamo";
+}
+
+<div class="card shadow-lg p-3 mb-5 bg-body rounded">
+    <div class="card-header">
+        Editar préstamo @Model.LoanId
+    </div>
+    <div class="card-body">
+        <a asp-action="Index" class="btn btn-primary">Regresar</a>
+        <br />
+        <br />
+        <form asp-action="EditLoan" method="post">
+            @Html.AntiForgeryToken() <!-- Token antifalsificación -->
+            <input type="hidden" asp-for="LoanId" />
+
+            <div class="row">
+                <!-- Monto del Préstamo -->
+                <div class="form-group col-6">
+                    <label asp-for="LoanAmount" class="control-label"></label>
+                    <input asp-for="LoanAmount" class="form-control" id="loanAmount" step="0.01" />
+                    <span asp-validation-for="LoanAmount" class="text-danger"></span>
+                </div>
+
+                <!-- Tipo de Pago -->
+                <div class="form-group col-6">
+                    <label asp-for="LoanPaymentTypeId"></label>
+                    <select asp-for="LoanPaymentTypeId" class="form-control">
+                        @foreach (var paymentType in (List<PaymentType>)ViewBag.PaymentTypes)
+                        {
+                            <option value="@paymentType.PaymentTypeId" selected="@(paymentType.PaymentTypeId == Model.LoanPaymentTypeId)">
+                                @paymentType.ShortName
+                            </option>
+                        }
+                    </select>
+                    <span asp-validation-for="LoanPaymentTypeId" class="text-danger"></span>
+                </div>
+
+                <!-- Intereses Aprobados -->
+                <div class="form-group col-6">
+                    <label asp-for="LoanApprovedInterest" class="control-label"></label>
+                    <input asp-for="LoanApprovedInterest" class="form-control" id="approvedInterest" />
+                    <span asp-validation-for="LoanApprovedInterest" class="text-danger"></span>
+                </div>
+
+                <!-- Intereses Moratorios -->
+                <div class="form-group col-6">
+                    <label asp-for="LoanLateInterest" class="control-label"></label>
+                    <input asp-for="LoanLateInterest" class="form-control" id="lateInterest" />
+                    <span asp-validation-for="LoanLateInterest" class="text-danger"></span>
+                </div>
+
+                <!-- Cantidad Total a Pagar (Calculada) -->
+                <div class="form-group col-6">
+                    <label class="control-label">Cantidad Total a Pagar</label>
+                    <input asp-for="LoanTotalAmountToPay" class="form-control" id="totalAmountToPay" readonly />
+                </div>
+                <!-- Cantidad Total a Pagar (Moratorio) -->
+                <div class="form-group col-6">
+                    <label class="control-label">Cantidad Total a Pagar (Moratorio)</label>
+                    <input asp-for="LoanTotalAmountToPayLate" class="form-control" id="totalAmountToPayLate" readonly />
+                </div>
+
+                <!-- Fecha del Primer Pago -->
+                <div class="form-group col-6" id="firstPaymentDateGroup">
+                    <label asp-for="LoanFirstPaymentDate" class="control-label"></label>
+                    <input asp-for="LoanFirstPaymentDate" class="form-control" type="date" id="firstPaymentDate" />
+                    <span asp-validation-for="LoanFirstPaymentDate" class="text-danger"></span>
+                </div>
+
+                <!-- Fecha del Último Pago -->
+                <div class="form-group col-6">
+                    <label asp-for="LoanFinalPaymentDate" class="control-label"></label>
+                    <input asp-for="LoanFinalPaymentDate" class="form-control" type="date" id="finalPaymentDate" />
+                    <span asp-validation-for="LoanFinalPaymentDate" class="text-danger"></span>
+                </div>
+
+                <!-- Notas -->
+                <div class="form-group">
+                    <label asp-for="LoanNotes" class="control-label"></label>
+                    <textarea asp-for="LoanNotes" class="form-control"></textarea>
+                    <span asp-validation-for="LoanNotes" class="text-danger"></span>
+                </div>
+
+                <hr />
+                <div class="form-group col-12">
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        await Html.RenderPartialAsync("Scripts/_CalcsEdit");
+
+    }
+
+    
+}

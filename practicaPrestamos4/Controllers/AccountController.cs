@@ -31,7 +31,7 @@ namespace practicaPrestamos4.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(string email, string password, string returnUrl = null)
         {
-            Console.WriteLine($" campos del login son: {email}, {password}, {returnUrl}");
+            //Console.WriteLine($" campos del login son: {email}, {password}, {returnUrl}");
             if (IsValidUser(email, password, out var userId)) // Modifica IsValidUser para devolver el ID del usuario
             {
                 var claims = new List<Claim>
@@ -108,7 +108,7 @@ namespace practicaPrestamos4.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Register(string email, string password, string name)
         {
-            Console.WriteLine($"Entra a la función crear con: {email}, {password}, {name}");
+            //Console.WriteLine($"Entra a la función crear con: {email}, {password}, {name}");
 
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(name))
             {
@@ -135,7 +135,7 @@ namespace practicaPrestamos4.Controllers
                 UpdatedAt = DateTime.UtcNow
             };
 
-            Console.WriteLine($"User con: {user}");
+            //Console.WriteLine($"User con: {user}");
 
             using (var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
             {

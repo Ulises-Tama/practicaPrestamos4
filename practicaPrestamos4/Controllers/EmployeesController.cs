@@ -129,11 +129,11 @@ namespace practicaPrestamos4.Controllers
         {
             // Obtener el ID del usuario desde las claims
             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            Console.WriteLine($"Usuario ID desde claims: {userIdString}");
+            //Console.WriteLine($"Usuario ID desde claims: {userIdString}");
 
             if (string.IsNullOrEmpty(userIdString))
             {
-                Console.WriteLine("El usuario no está autenticado o no tiene un NameIdentifier.");
+                //Console.WriteLine("El usuario no está autenticado o no tiene un NameIdentifier.");
                 return 0; // Si no está autenticado o no tiene un ID válido
             }
 
@@ -143,14 +143,14 @@ namespace practicaPrestamos4.Controllers
                 var userExists = _context.Users.Any(u => u.Id == userId);
                 if (!userExists)
                 {
-                    Console.WriteLine($"El usuario con ID {userId} no existe en la base de datos.");
+                    //Console.WriteLine($"El usuario con ID {userId} no existe en la base de datos.");
                     return 0; // Si el usuario no existe
                 }
 
                 return userId;
             }
 
-            Console.WriteLine($"El ID del usuario no es un número válido: {userIdString}");
+            //Console.WriteLine($"El ID del usuario no es un número válido: {userIdString}");
             return 0; // Si el ID no es un número válido
         }
 
